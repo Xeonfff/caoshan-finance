@@ -1,6 +1,6 @@
 {
   "updated": "2026-06-03",
-  "bankCard": 210,
+  "bankCard": 206.2,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
@@ -14,7 +14,8 @@
   "payOffTarget": "2026.6.14",
   "income": [],
   "expense": [
-    { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 }
+    { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 },
+    { "date": "6/3", "item": "本子x2", "category": "文具", "amount": 3.8 }
   ],
   "weightRecords": [
     { "date": "5/25", "weight": 94.5 },
