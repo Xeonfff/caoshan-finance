@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🎯 专注 - 草山账本</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a1a2e">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;color:#1a1a2e}
+
+/* 顶栏 */
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.header h1{font-size:22px;font-weight:700}
+.header a{font-size:13px;color:#3b82f6;text-decoration:none}
+
+/* tab切换 */
+.tabs{display:flex;gap:0;margin-bottom:14px;background:#fff;border-radius:12px;padding:4px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.tab{flex:1;text-align:center;padding:10px 0;font-size:13px;font-weight:600;border-radius:10px;cursor:pointer;color:#999;transition:all .2s}
+.tab.active{background:#1a1a2e;color:#fff}
+
+/* 卡片 */
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card-title{font-size:14px;font-weight:600;color:#666;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* ====== 四象限 ====== */
+.quad-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.quad{background:#fff;border-radius:12px;padding:10px;min-height:120px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.quad-header{font-size:12px;font-weight:600;margin-bottom:6px;display:flex;justify-content:space-between}
+.quad-header .count{font-size:11px;color:#999;font-weight:400}
+.quad-tasks{min-height:40px}
+.quad-item{font-size:12px;padding:5px 6px;margin-bottom:3px;background:#f8f9fa;border-radius:6px;display:flex;align-items:center;gap:4px;cursor:pointer}
+.quad-item input[type=checkbox]{width:14px;height:14px;accent-color:#3b82f6;cursor:pointer;flex-shrink:0}
+.quad-item .q-title{flex:1;word-break:break-all}
+.quad-item .q-time{font-size:10px;color:#999;white-space:nowrap}
+.quad-item.done .q-title{text-decoration:line-through;color:#ccc}
+.quad-item .q-del{font-size:14px;color:#ccc;cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0}
+.quad-item .q-del:active{color:#ef4444}
+.quad-add{font-size:12px;color:#3b82f6;cursor:pointer;padding:6px 0;text-align:center;border-radius:6px;margin-top:4px;background:#f8f9fa}
+.quad-add:active{background:#eef2ff}
+.q-iu .quad-header{color:#ef4444}
+.q-in .quad-header{color:#3b82f6}
+.q-nu .quad-header{color:#f59e0b}
+.q-nn .quad-header{color:#9ca3af}
+
+/* ====== 番茄钟 ====== */
+.timer-wrap{text-align:center;padding:10px 0}
+.timer-circle{width:220px;height:220px;border-radius:50%;margin:0 auto 14px;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;background:#f8f9fa}
+.timer-circle svg{position:absolute;transform:rotate(-90deg)}
+.timer-circle .time{font-size:48px;font-weight:700;z-index:1;font-variant-numeric:tabular-nums}
+.timer-circle .mode-label{font-size:13px;color:#999;z-index:1;margin-top:2px}
+.timer-circle .session-count{font-size:12px;color:#999;z-index:1;margin-top:2px}
+.timer-btns{display:flex;gap:10px;justify-content:center;margin-bottom:10px}
+.timer-btns button{padding:10px 28px;border:none;border-radius:99px;font-size:15px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-start{background:#22c55e;color:#fff}
+.btn-pause{background:#f59e0b;color:#fff}
+.btn-reset{background:#f0f2f5;color:#666;padding:10px 16px}
+.timer-task{display:flex;gap:8px;align-items:center;justify-content:center;margin-top:6px}
+.timer-task select{padding:6px 12px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;background:#fff;max-width:200px}
+.timer-status{font-size:12px;color:#999;margin-top:6px}
+
+/* ====== 统计 ====== */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-card{text-align:center;padding:12px 4px;background:#f8f9fa;border-radius:12px}
+.stat-card .num{font-size:22px;font-weight:700;color:#1a1a2e}
+.stat-card .label{font-size:11px;color:#999;margin-top:2px}
+.chart-box{height:180px;margin:6px 0}
+
+/* ====== 设置 ====== */
+.setting-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f5f5f5;font-size:14px}
+.setting-row:last-child{border:none}
+.setting-row input[type=number]{width:60px;padding:6px 8px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px;text-align:center}
+.setting-row input[type=password]{flex:1;max-width:280px;padding:6px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:13px;margin-left:10px}
+.setting-row .btn{background:#3b82f6;color:#fff;border:none;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.setting-row .btn:active{background:#2563eb}
+.setting-row .btn.green{background:#22c55e}
+.setting-row .btn.green:active{background:#16a34a}
+.setting-row .btn.outline{background:transparent;color:#3b82f6;border:1px solid #3b82f6;padding:7px 15px}
+.sync-status{font-size:12px;color:#999;text-align:center;margin-top:8px}
+
+/* ====== 弹窗 ====== */
+.modal-overlay{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.4);z-index:999;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:20px;width:90%;max-width:360px;max-height:80vh;overflow-y:auto}
+.modal h3{font-size:16px;margin-bottom:12px}
+.modal label{font-size:13px;color:#666;display:block;margin:8px 0 4px}
+.modal input,.modal select{width:100%;padding:8px 10px;border:1px solid #e0e0e0;border-radius:8px;font-size:14px}
+.modal .btns{display:flex;gap:10px;margin-top:14px}
+.modal .btns button{flex:1;padding:10px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.modal .btns .ok{background:#1a1a2e;color:#fff}
+.modal .btns .cancel{background:#f0f2f5;color:#666}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>🎯 专注</h1>
+  <a href="index.html">← 账本</a>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="matrix">四象限</div>
+  <div class="tab" data-tab="timer">番茄钟</div>
+  <div class="tab" data-tab="stats">统计</div>
+  <div class="tab" data-tab="settings">设置</div>
+</div>
+
+<!-- ====== 四象限 ====== -->
+<div id="matrixView" class="tab-view">
+  <div class="quad-grid">
+    <div class="quad q-iu" data-quad="iu">
+      <div class="quad-header"><span>🔴 重要紧急</span><span class="count" id="cnt-iu">0</span></div>
+      <div class="quad-tasks" id="tasks-iu"></div>
+      <div class="quad-add" onclick="openAddModal('iu')">+ 添加</div>
+    </div>
+    <div class="quad q-in" data-quad="in">
+      <div class="quad-header"><span>🔵 重要不紧急</span><span class="count" id="cnt-in">0</span></div>
+      <div class="quad-tasks" id="tasks-in"></div>
+      <div class="quad-add" onclick="openAddModal('in')">+ 添加</div>
+    </div>
+    <div class="quad q-nu" data-quad="nu">
+      <div class="quad-header"><span>🟠 不重要紧急</span><span class="count" id="cnt-nu">0</span></div>
+      <div class="quad-tasks" id="tasks-nu"></div>
+      <div class="quad-add" onclick="openAddModal('nu')">+ 添加</div>
+    </div>
+    <div class="quad q-nn" data-quad="nn">
+      <div class="quad-header"><span>⚪ 不重要不紧急</span><span class="count" id="cnt-nn">0</span></div>
+      <div class="quad-tasks" id="tasks-nn"></div>
+      <div class="quad-add" onclick="openAddModal('nn')">+ 添加</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 番茄钟 ====== -->
+<div id="timerView" class="tab-view" style="display:none">
+  <div class="card">
+    <div class="timer-wrap">
+      <div class="timer-circle" id="timerCircle">
+        <svg width="220" height="220" viewBox="0 0 220 220">
+          <circle cx="110" cy="110" r="100" fill="none" stroke="#f0f0f0" stroke-width="6"/>
+          <circle id="progressArc" cx="110" cy="110" r="100" fill="none" stroke="#ef4444" stroke-width="6"
+            stroke-linecap="round" stroke-dasharray="628.3" stroke-dashoffset="0"/>
+        </svg>
+        <div class="time" id="timerDisplay">25:00</div>
+        <div class="mode-label" id="timerMode">工作中</div>
+        <div class="session-count" id="timerSession">🍅 第 0 个</div>
+      </div>
+      <div class="timer-btns">
+        <button class="btn-start" id="timerBtn" onclick="toggleTimer()">▶ 开始</button>
+        <button class="btn-reset" onclick="resetTimer()">↺</button>
+      </div>
+      <div class="timer-task">
+        <span style="font-size:13px;color:#666">当前任务</span>
+        <select id="taskSelector"><option value="">-- 无 --</option></select>
+      </div>
+      <div class="timer-status" id="timerStatus">准备就绪</div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== 统计 ====== -->
+<div id="statsView" class="tab-view" style="display:none">
+  <div class="stats-grid">
+    <div class="stat-card"><div class="num" id="statTodayMin">0</div><div class="label">今日专注(分)</div></div>
+    <div class="stat-card"><div class="num" id="statTodayTasks">0</div><div class="label">完成任务</div></div>
+    <div class="stat-card"><div class="num" id="statTodayPomo">0</div><div class="label">番茄个数</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 最近7天专注时间</div>
+    <div class="chart-box"><canvas id="weeklyChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🧩 四象限时间分布</div>
+    <div class="chart-box"><canvas id="quadChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📋 最近记录</div>
+    <div id="recentLog" style="font-size:13px;color:#666"></div>
+  </div>
+</div>
+
+<!-- ====== 设置 ====== -->
+<div id="settingsView" class="tab-view" style="display:none">
+  <div class="card">
+    <div class="card-title">⚙️ 番茄钟设置</div>
+    <div class="setting-row"><span>工作时长</span><input type="number" id="setWork" min="1" max="120" value="25"> 分钟</div>
+    <div class="setting-row"><span>短休息时长</span><input type="number" id="setBreak" min="1" max="30" value="5"> 分钟</div>
+    <div class="setting-row"><span>长休息时长</span><input type="number" id="setLongBreak" min="1" max="60" value="15"> 分钟</div>
+    <div class="setting-row"><span>长休间隔</span><input type="number" id="setLongInterval" min="1" max="10" value="4"> 个番茄</div>
+    <div class="setting-row"><span style="color:#999;font-size:12px">修改后下次番茄生效</span></div>
+  </div>
+  <div class="card">
+    <div class="card-title">☁️ GitHub 同步</div>
+    <div class="setting-row" style="flex-wrap:wrap;gap:8px">
+      <span>Token</span>
+      <input type="password" id="githubToken" placeholder="ghp_..." style="flex:1;min-width:150px">
+    </div>
+    <div class="setting-row" style="gap:8px;flex-wrap:wrap">
+      <button class="btn green" onclick="syncToGithub()">⬆ 同步到 GitHub</button>
+      <button class="btn outline" onclick="syncFromGithub()">⬇ 从 GitHub 拉取</button>
+    </div>
+    <div class="sync-status" id="syncStatus">未同步</div>
+  </div>
+</div>
+
+<!-- ====== 添加任务弹窗 ====== -->
+<div class="modal-overlay" id="addModal">
+  <div class="modal">
+    <h3>📌 添加任务</h3>
+    <label>任务名称</label>
+    <input id="newTaskTitle" placeholder="比如：高数第三章复习">
+    <label>预计用时</label>
+    <input id="newTaskTime" type="number" min="0" value="30" placeholder="分钟">
+    <label>所属象限</label>
+    <select id="newTaskQuad">
+      <option value="iu">🔴 重要紧急</option>
+      <option value="in">🔵 重要不紧急</option>
+      <option value="nu">🟠 不重要紧急</option>
+      <option value="nn">⚪ 不重要不紧急</option>
+    </select>
+    <div class="btns">
+      <button class="cancel" onclick="closeAddModal()">取消</button>
+      <button class="ok" onclick="addTask()">添加</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ====== ID生成 ======
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ====== 默认数据 ======
+function defaultData() {
+  return { updated: '', tasks: [], pomodoros: [] };
+}
+let DATA = defaultData();
+
+// ====== 持久化 ======
+function saveLocal() {
+  localStorage.setItem('focusData', JSON.stringify(DATA));
+}
+function loadLocal() {
+  try {
+    const d = localStorage.getItem('focusData');
+    if (d) { DATA = JSON.parse(d); return true; }
+  } catch(e) {}
+  return false;
+}
+
+// ====== 日期工具 ======
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function fmtTime(min) {
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h ? `${h}h${m}m` : `${m}分钟`;
+}
+const QUAD_LABELS = { iu:'重要紧急', in:'重要不紧急', nu:'不重要紧急', nn:'不重要不紧急' };
+const QUAD_COLORS = { iu:'#ef4444', in:'#3b82f6', nu:'#f59e0b', nn:'#9ca3af' };
+
+// ====== Tab切换 ======
+document.querySelectorAll('.tab').forEach(el => {
+  el.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.tab-view').forEach(v => v.style.display = 'none');
+    document.getElementById(el.dataset.tab + 'View').style.display = '';
+    if (el.dataset.tab === 'stats') renderStats();
+    if (el.dataset.tab === 'settings') loadSettings();
+  });
+});
+
+// ====== 添加任务弹窗 ======
+let addQuad = 'iu';
+function openAddModal(quad) {
+  addQuad = quad;
+  document.getElementById('newTaskQuad').value = quad;
+  document.getElementById('newTaskTitle').value = '';
+  document.getElementById('newTaskTime').value = 30;
+  document.getElementById('addModal').classList.add('show');
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('show');
+}
+function addTask() {
+  const title = document.getElementById('newTaskTitle').value.trim();
+  if (!title) { alert('请输入任务名称'); return; }
+  const time = parseInt(document.getElementById('newTaskTime').value) || 0;
+  const quad = document.getElementById('newTaskQuad').value;
+  DATA.tasks.push({
+    id: uid(), title, quadrant: quad, estimatedMinutes: time,
+    completed: false, createdAt: new Date().toISOString(), completedAt: null
+  });
+  saveLocal();
+  closeAddModal();
+  renderMatrix();
+  updateTaskSelector();
+}
+function toggleTask(id) {
+  const t = DATA.tasks.find(x => x.id === id);
+  if (!t) return;
+  t.completed = !t.completed;
+  t.completedAt = t.completed ? new Date().toISOString() : null;
+  saveLocal();
+  renderMatrix();
+}
+function deleteTask(id) {
+  if (!confirm('删除这个任务？')) return;
+  DATA.tasks = DATA.tasks.filter(x => x.id !== id);
+  saveLocal();
+  renderMatrix();
+  updateTaskSelector();
+}
+function changeQuad(id, quad) {
+  const t = DATA.tasks.find(x => x.id === id);
+  if (!t) return;
+  t.quadrant = quad;
+  saveLocal();
+  renderMatrix();
+}
+
+// ====== 四象限渲染 ======
+function renderMatrix() {
+  const quads = ['iu','in','nu','nn'];
+  quads.forEach(q => {
+    const list = DATA.tasks.filter(t => t.quadrant === q && !t.completed);
+    const done = DATA.tasks.filter(t => t.quadrant === q && t.completed);
+    const all = [...list, ...done];
+    document.getElementById('cnt-'+q).textContent = all.length;
+    const container = document.getElementById('tasks-'+q);
+    container.innerHTML = all.map(t => `
+      <div class="quad-item${t.completed?' done':''}">
+        <input type="checkbox" ${t.completed?'checked':''} onchange="toggleTask('${t.id}')">
+        <span class="q-title">${escHtml(t.title)}</span>
+        ${t.estimatedMinutes ? `<span class="q-time">${t.estimatedMinutes}′</span>` : ''}
+        <select style="font-size:10px;border:none;background:transparent;color:#999;max-width:50px" onchange="changeQuad('${t.id}', this.value)">
+          <option value="iu" ${t.quadrant==='iu'?'selected':''}>急重</option>
+          <option value="in" ${t.quadrant==='in'?'selected':''}>重缓</option>
+          <option value="nu" ${t.quadrant==='nu'?'selected':''}>急轻</option>
+          <option value="nn" ${t.quadrant==='nn'?'selected':''}>轻缓</option>
+        </select>
+        <span class="q-del" onclick="deleteTask('${t.id}')">✕</span>
+      </div>
+    `).join('');
+  });
+}
+
+function escHtml(s) { return String(s).replace(/[&<>"]/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]; }); }
+
+// ====== 任务选择器更新 ======
+function updateTaskSelector() {
+  const sel = document.getElementById('taskSelector');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">-- 无 --</option>'
+    + DATA.tasks.filter(t => !t.completed).map(t => `<option value="${t.id}" ${t.id===cur?'selected':''}>${escHtml(t.title)}</option>`).join('');
+}
+function getSelectedTask() {
+  const id = document.getElementById('taskSelector').value;
+  return DATA.tasks.find(t => t.id === id);
+}
+
+// ====== 番茄钟逻辑 ======
+const STATE_IDLE = 0, STATE_RUNNING = 1, STATE_PAUSED = 2;
+const MODE_WORK = 0, MODE_BREAK = 1, MODE_LONGBREAK = 2;
+
+let timer = {
+  state: STATE_IDLE,
+  mode: MODE_WORK,
+  duration: 25 * 60, // seconds
+  remaining: 25 * 60,
+  startTime: null,
+  sessionCount: 0, // completed work sessions today
+  timerId: null,
+  currentTaskId: null,
+};
+
+function getSettings() {
+  return {
+    work: parseInt(localStorage.getItem('focusWork') || '25'),
+    break: parseInt(localStorage.getItem('focusBreak') || '5'),
+    longBreak: parseInt(localStorage.getItem('focusLongBreak') || '15'),
+    longInterval: parseInt(localStorage.getItem('focusLongInterval') || '4'),
+  };
+}
+
+function loadSettingsUI() {
+  const s = getSettings();
+  document.getElementById('setWork').value = s.work;
+  document.getElementById('setBreak').value = s.break;
+  document.getElementById('setLongBreak').value = s.longBreak;
+  document.getElementById('setLongInterval').value = s.longInterval;
+  const token = localStorage.getItem('githubToken') || '';
+  document.getElementById('githubToken').value = token;
+}
+function saveSettingsUI() {
+  localStorage.setItem('focusWork', document.getElementById('setWork').value);
+  localStorage.setItem('focusBreak', document.getElementById('setBreak').value);
+  localStorage.setItem('focusLongBreak', document.getElementById('setLongBreak').value);
+  localStorage.setItem('focusLongInterval', document.getElementById('setLongInterval').value);
+  localStorage.setItem('githubToken', document.getElementById('githubToken').value);
+}
+
+function loadSettings() {
+  loadSettingsUI();
+}
+
+function getTimerDuration() {
+  const s = getSettings();
+  if (timer.mode === MODE_WORK) return s.work * 60;
+  if (timer.mode === MODE_BREAK) return s.break * 60;
+  return s.longBreak * 60;
+}
+
+function getModeLabel() {
+  return ['工作中','短休息','长休息'][timer.mode];
+}
+
+function getModeColor() {
+  return ['#ef4444','#22c55e','#3b82f6'][timer.mode];
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timer.remaining / 60);
+  const s = timer.remaining % 60;
+  document.getElementById('timerDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  document.getElementById('timerMode').textContent = getModeLabel();
+  document.getElementById('timerMode').style.color = getModeColor();
+
+  const total = getTimerDuration();
+  const pct = total > 0 ? (1 - timer.remaining / total) : 0;
+  const circumference = 2 * Math.PI * 100;
+  const offset = circumference * (1 - pct);
+  const arc = document.getElementById('progressArc');
+  arc.setAttribute('stroke-dasharray', circumference);
+  arc.setAttribute('stroke-dashoffset', offset);
+  arc.setAttribute('stroke', getModeColor());
+
+  document.getElementById('timerSession').textContent = `🍅 第 ${timer.sessionCount} 个`;
+}
+
+function toggleTimer() {
+  if (timer.state === STATE_IDLE) {
+    // Check if there's a task selected
+    const task = getSelectedTask();
+    if (!task) { alert('请先选择当前任务'); return; }
+    timer.currentTaskId = task.id;
+
+    const s = getSettings();
+    timer.duration = getTimerDuration();
+    timer.remaining = timer.duration;
+    timer.state = STATE_RUNNING;
+    timer.startTime = Date.now();
+    document.getElementById('timerBtn').textContent = '⏸ 暂停';
+    document.getElementById('timerBtn').className = 'btn-pause';
+    document.getElementById('timerStatus').textContent = '🎯 专注中...';
+    timer.timerId = setInterval(timerTick, 200);
+  } else if (timer.state === STATE_RUNNING) {
+    timer.state = STATE_PAUSED;
+    if (timer.timerId) clearInterval(timer.timerId);
+    document.getElementById('timerBtn').textContent = '▶ 继续';
+    document.getElementById('timerBtn').className = 'btn-start';
+    document.getElementById('timerStatus').textContent = '⏸ 已暂停';
+  } else {
+    timer.state = STATE_RUNNING;
+    timer.startTime = Date.now() - (timer.duration - timer.remaining) * 1000;
+    document.getElementById('timerBtn').textContent = '⏸ 暂停';
+    document.getElementById('timerBtn').className = 'btn-pause';
+    document.getElementById('timerStatus').textContent = '🎯 专注中...';
+    timer.timerId = setInterval(timerTick, 200);
+  }
+}
+
+function timerTick() {
+  if (timer.state !== STATE_RUNNING) return;
+  const elapsed = (Date.now() - timer.startTime) / 1000;
+  timer.remaining = Math.max(0, timer.duration - elapsed);
+  updateTimerDisplay();
+
+  if (timer.remaining <= 0) {
+    completeTimer();
+  }
+}
+
+function completeTimer() {
+  if (timer.timerId) clearInterval(timer.timerId);
+  timer.state = STATE_IDLE;
+
+  if (timer.mode === MODE_WORK) {
+    // Record pomodoro
+    const s = getSettings();
+    const task = getSelectedTask();
+    DATA.pomodoros.push({
+      id: uid(),
+      taskId: timer.currentTaskId || (task ? task.id : ''),
+      date: todayStr(),
+      startTime: new Date(Date.now() - timer.duration * 1000).toISOString(),
+      duration: s.work,
+      type: 'focus',
+      completed: true,
+    });
+    timer.sessionCount++;
+    saveLocal();
+
+    // Notify
+    notifyUser('🍅 番茄完成！', `专注 ${s.work} 分钟，休息一下吧`);
+
+    // Auto-switch to break
+    if (timer.sessionCount % s.longInterval === 0) {
+      timer.mode = MODE_LONGBREAK;
+    } else {
+      timer.mode = MODE_BREAK;
+    }
+  } else {
+    // Break done, switch back to work
+    notifyUser('⏰ 休息结束', '该继续了！');
+    timer.mode = MODE_WORK;
+  }
+
+  timer.duration = getTimerDuration();
+  timer.remaining = timer.duration;
+  document.getElementById('timerBtn').textContent = '▶ 开始';
+  document.getElementById('timerBtn').className = 'btn-start';
+  document.getElementById('timerStatus').textContent = timer.mode === MODE_WORK ? '准备就绪' : '休息中...';
+  updateTimerDisplay();
+  updateTaskSelector();
+}
+
+function resetTimer() {
+  if (timer.timerId) clearInterval(timer.timerId);
+  timer.state = STATE_IDLE;
+  timer.mode = MODE_WORK;
+  timer.duration = getTimerDuration();
+  timer.remaining = timer.duration;
+  document.getElementById('timerBtn').textContent = '▶ 开始';
+  document.getElementById('timerBtn').className = 'btn-start';
+  document.getElementById('timerStatus').textContent = '已重置';
+  updateTimerDisplay();
+}
+
+function notifyUser(title, body) {
+  // Try browser notification
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, { body, icon: 'icon.svg' });
+  }
+  // Try vibration
+  if (navigator.vibrate) navigator.vibrate(200);
+  // Audio beep using Web Audio API
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 800;
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.5);
+  } catch(e) {}
+}
+
+// Request notification permission on first interaction
+document.addEventListener('click', () => {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+});
+
+// ====== 统计 ======
+function calcStats() {
+  const today = todayStr();
+  const todayPomos = DATA.pomodoros.filter(p => p.date === today && p.type === 'focus');
+  const todayMin = todayPomos.reduce((s, p) => s + (p.duration || 0), 0);
+  const todayTasks = new Set(todayPomos.map(p => p.taskId).filter(Boolean)).size;
+
+  // Last 7 days
+  const weekData = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const mins = DATA.pomodoros.filter(p => p.date === ds && p.type === 'focus').reduce((s,p) => s + (p.duration||0), 0);
+    weekData.push({ date: ds, label: `${d.getMonth()+1}/${d.getDate()}`, minutes: mins });
+  }
+
+  // Quadrant time
+  const quadTime = {};
+  DATA.pomodoros.filter(p => p.type === 'focus').forEach(p => {
+    const task = DATA.tasks.find(t => t.id === p.taskId);
+    const q = task ? task.quadrant : 'nn';
+    quadTime[q] = (quadTime[q] || 0) + (p.duration || 0);
+  });
+
+  return { todayMin, todayTasks, todayPomos: todayPomos.length, weekData, quadTime };
+}
+
+let weeklyChart = null, quadChart = null;
+
+function renderStats() {
+  const stats = calcStats();
+  document.getElementById('statTodayMin').textContent = stats.todayMin;
+  document.getElementById('statTodayTasks').textContent = stats.todayTasks;
+  document.getElementById('statTodayPomo').textContent = stats.todayPomos;
+
+  // Weekly chart
+  const wCtx = document.getElementById('weeklyChart').getContext('2d');
+  if (weeklyChart) weeklyChart.destroy();
+  weeklyChart = new Chart(wCtx, {
+    type: 'bar',
+    data: {
+      labels: stats.weekData.map(d => d.label),
+      datasets: [{
+        label: '专注分钟',
+        data: stats.weekData.map(d => d.minutes),
+        backgroundColor: '#3b82f6',
+        borderRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 25 } },
+        x: { grid: { display: false } }
+      }
+    }
+  });
+
+  // Quadrant chart
+  const qCtx = document.getElementById('quadChart').getContext('2d');
+  if (quadChart) quadChart.destroy();
+  const qLabels = Object.keys(stats.quadTime);
+  const qValues = Object.values(stats.quadTime);
+  const qColors = qLabels.map(q => QUAD_COLORS[q] || '#999');
+  const qLabelFull = qLabels.map(q => QUAD_LABELS[q] || '其他');
+  quadChart = new Chart(qCtx, {
+    type: 'doughnut',
+    data: {
+      labels: qLabelFull.length ? qLabelFull : ['暂无'],
+      datasets: [{ data: qValues.length ? qValues : [1], backgroundColor: qColors.length ? qColors : ['#eee'], borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 10, font: { size: 11 } } } },
+      cutout: '68%'
+    }
+  });
+
+  // Recent log
+  const recent = DATA.pomodoros.filter(p => p.type === 'focus').sort((a,b) => b.date.localeCompare(a.date)).slice(0, 10);
+  const logEl = document.getElementById('recentLog');
+  if (!recent.length) {
+    logEl.innerHTML = '<div style="text-align:center;color:#ccc;padding:10px">暂无记录</div>';
+  } else {
+    logEl.innerHTML = recent.map(p => {
+      const task = DATA.tasks.find(t => t.id === p.taskId);
+      return `<div style="padding:4px 0;border-bottom:1px solid #f5f5f5;display:flex;justify-content:space-between">
+        <span>${p.date} ${task ? escHtml(task.title) : '未知任务'}</span>
+        <span style="color:#3b82f6">${p.duration}分钟</span>
+      </div>`;
+    }).join('');
+  }
+}
+
+// ====== GitHub同步 ======
+function getToken() { return document.getElementById('githubToken').value.trim() || localStorage.getItem('githubToken') || ''; }
+
+async function syncToGithub() {
+  const token = getToken();
+  if (!token) { document.getElementById('syncStatus').textContent = '⚠️ 请先在设置中输入 GitHub Token'; return; }
+  document.getElementById('syncStatus').textContent = '⏳ 同步中...';
+
+  try {
+    DATA.updated = new Date().toISOString();
+    saveLocal();
+    const content = btoa(unescape(encodeURIComponent(JSON.stringify(DATA, null, 2) + '\n')));
+
+    // Get current file SHA if exists
+    let sha = null;
+    try {
+      const res = await fetch('https://api.github.com/repos/Xeonfff/caoshan-finance/contents/focus-data.json', {
+        headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+      });
+      if (res.ok) { const d = await res.json(); sha = d.sha; }
+    } catch(e) {}
+
+    const body = { message: `🎯 专注数据同步 ${todayStr()}`, content };
+    if (sha) body.sha = sha;
+
+    const res = await fetch('https://api.github.com/repos/Xeonfff/caoshan-finance/contents/focus-data.json', {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if (res.ok) {
+      document.getElementById('syncStatus').textContent = `✅ 同步成功 ${new Date().toLocaleString('zh-CN')}`;
+    } else {
+      const err = await res.json();
+      document.getElementById('syncStatus').textContent = `❌ 同步失败: ${err.message}`;
+    }
+  } catch(e) {
+    document.getElementById('syncStatus').textContent = `❌ 同步失败: ${e.message}`;
+  }
+}
+
+async function syncFromGithub() {
+  const token = getToken();
+  if (!token) { document.getElementById('syncStatus').textContent = '⚠️ 请先在设置中输入 GitHub Token'; return; }
+  document.getElementById('syncStatus').textContent = '⏳ 拉取中...';
+
+  try {
+    const res = await fetch('https://api.github.com/repos/Xeonfff/caoshan-finance/contents/focus-data.json', {
+      headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' }
+    });
+    if (!res.ok) throw new Error('文件不存在或无权访问');
+    const d = await res.json();
+    const raw = decodeURIComponent(escape(atob(d.content)));
+    const remote = JSON.parse(raw);
+
+    // Merge: keep local tasks/pomodoros that don't exist in remote
+    const localIds = new Set(DATA.tasks.map(t => t.id));
+    const remoteIds = new Set(remote.tasks.map(t => t.id));
+    remote.tasks.forEach(t => { if (!localIds.has(t.id)) DATA.tasks.push(t); });
+    remote.pomodoros.forEach(p => { if (!DATA.pomodoros.some(x => x.id === p.id)) DATA.pomodoros.push(p); });
+    saveLocal();
+
+    renderMatrix();
+    updateTaskSelector();
+    document.getElementById('syncStatus').textContent = `✅ 拉取成功，合并了远程数据`;
+  } catch(e) {
+    document.getElementById('syncStatus').textContent = `❌ 拉取失败: ${e.message}`;
+  }
+}
+
+// ====== 初始化 ======
+function init() {
+  if (!loadLocal()) {
+    DATA = defaultData();
+    saveLocal();
+  }
+
+  // Load settings
+  loadSettingsUI();
+
+  // Save settings on change
+  ['setWork','setBreak','setLongBreak','setLongInterval'].forEach(id => {
+    document.getElementById(id).addEventListener('change', saveSettingsUI);
+  });
+  document.getElementById('githubToken').addEventListener('change', saveSettingsUI);
+
+  timer.duration = getTimerDuration();
+  timer.remaining = timer.duration;
+  updateTimerDisplay();
+  renderMatrix();
+  updateTaskSelector();
+
+  // Daily session count
+  const todayPomos = DATA.pomodoros.filter(p => p.date === todayStr() && p.type === 'focus');
+  timer.sessionCount = todayPomos.length;
+
+  // Check sync status
+  const token = getToken();
+  if (token) document.getElementById('syncStatus').textContent = '已配置 Token，点击同步';
+}
+
+init();
+</script>
+</body>
+</html>
