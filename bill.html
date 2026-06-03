@@ -82,7 +82,27 @@ body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;col
 <div id="navArea"></div>
 <div id="billList"></div>
 
+<!-- 强制刷新 -->
+<div class="card" style="text-align:center;cursor:pointer" onclick="clearCacheAndReload()">
+  <div style="font-size:13px;color:#ef4444;font-weight:600">🔄 强制刷新</div>
+  <div style="font-size:11px;color:#999;margin-top:4px">清除缓存并重新加载最新数据</div>
+</div>
+
 <script>
+// ====== 强制刷新 ======
+function clearCacheAndReload() {
+  if ('serviceWorker' in navigator && 'caches' in window) {
+    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).then(() => {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) reg.unregister();
+        location.reload(true);
+      });
+    });
+  } else {
+    location.reload(true);
+  }
+}
+
 // ====== tab切换 ======
 let currentTab = 'daily';
 document.querySelectorAll('.tab').forEach(el => {

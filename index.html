@@ -146,7 +146,27 @@ td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
   <div class="chart-container"><canvas id="weightChart"></canvas></div>
 </div>
 
+<!-- 强制刷新 -->
+<div class="card" style="text-align:center;cursor:pointer" onclick="clearCacheAndReload()">
+  <div style="font-size:13px;color:#ef4444;font-weight:600">🔄 强制刷新</div>
+  <div style="font-size:11px;color:#999;margin-top:4px">清除缓存并重新加载最新数据</div>
+</div>
+
 <script>
+// ====== 强制刷新 ======
+function clearCacheAndReload() {
+  if ('serviceWorker' in navigator && 'caches' in window) {
+    caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))).then(() => {
+      navigator.serviceWorker.getRegistration().then(reg => {
+        if (reg) reg.unregister();
+        location.reload(true);
+      });
+    });
+  } else {
+    location.reload(true);
+  }
+}
+
 // ====== Service Worker 注册 ======
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js');
