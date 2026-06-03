@@ -207,7 +207,9 @@ function render() {
   document.getElementById('yuebao').textContent = '¥' + DATA.yuebao.toFixed(0);
   let fd = '';
   DATA.funds.forEach(f => {
-    fd += '<div class="fund-row"><span class="name">' + f.name + '</span><span class="val">¥' + f.value.toFixed(2) + '</span></div>';
+    const ch = f.change;
+    const chStr = ch !== undefined ? ` <span style="font-size:12px;${ch >= 0 ? 'color:#22c55e' : 'color:#ef4444'}">${ch >= 0 ? '+' : ''}${ch.toFixed(2)}</span>` : '';
+    fd += '<div class="fund-row"><span class="name">' + f.name + '</span><span class="val">¥' + f.value.toFixed(2) + chStr + '</span></div>';
   });
   document.getElementById('fundDetail').innerHTML = fd;
   document.getElementById('deadTotal').textContent = '¥' + deadTotal.toFixed(0);

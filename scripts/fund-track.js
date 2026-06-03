@@ -104,6 +104,7 @@ async function main() {
         // 首次运行：用当前市值反推份额
         fund.shares = Math.round((fund.value / currentNav) * 10000) / 10000;
         fund.value = Math.round(fund.shares * currentNav * 100) / 100;
+        fund.change = 0;
         results.push({
           name: fund.name,
           nav: currentNav,
@@ -118,6 +119,7 @@ async function main() {
         // 排除定投部分算出纯涨跌
         const investAmt = (invest && !investDone) ? invest.amount : 0;
         const pureChange = fund.value - oldValue - investAmt;
+        fund.change = Math.round(pureChange * 100) / 100;
         results.push({
           name: fund.name,
           nav: currentNav,
