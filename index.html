@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>💰 草山账本</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;color:#1a1a2e}
+h1{font-size:22px;font-weight:700;margin-bottom:4px;color:#1a1a2e}
+.sub{color:#666;font-size:13px;margin-bottom:16px}
+
+/* 卡片 */
+.card{background:#fff;border-radius:16px;padding:18px 16px;margin-bottom:14px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.card-title{font-size:14px;font-weight:600;color:#666;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+
+/* 总资产大头 */
+.big-nums{display:flex;gap:12px}
+.big-nums>div{flex:1;text-align:center;padding:12px 0}
+.big-nums .label{font-size:12px;color:#999;margin-bottom:4px}
+.big-nums .num{font-size:26px;font-weight:700}
+.big-nums .num.green{color:#22c55e}
+.big-nums .num.red{color:#ef4444}
+.big-nums .num.blue{color:#3b82f6}
+
+/* 进度条 */
+.progress-wrap{background:#f0f0f0;border-radius:99px;height:8px;margin:10px 0 4px;overflow:hidden}
+.progress-bar{height:100%;border-radius:99px;background:linear-gradient(90deg,#22c55e,#16a34a);transition:width .5s}
+.progress-label{font-size:12px;color:#999;display:flex;justify-content:space-between}
+
+/* 明细行 */
+.row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #f0f0f0;font-size:14px}
+.row:last-child{border:none}
+.row .tag{font-size:11px;background:#f0f2f5;padding:2px 8px;border-radius:99px;color:#666}
+.row .amt{font-weight:600;white-space:nowrap}
+.amt.green{color:#22c55e}
+.amt.red{color:#ef4444}
+
+/* 表格 */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 4px 6px;color:#999;font-weight:500;border-bottom:1px solid #eee;font-size:12px}
+td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
+.in-tag{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:99px;font-size:11px;white-space:nowrap}
+.out-tag{background:#fce7f3;color:#9d174d;padding:2px 8px;border-radius:99px;font-size:11px;white-space:nowrap}
+.amt-in{color:#22c55e;font-weight:600}
+.amt-out{color:#ef4444;font-weight:600}
+.empty{text-align:center;color:#ccc;padding:20px 0;font-size:13px}
+
+/* chart容器 */
+.chart-container{height:180px;margin:6px 0 0}
+.fund-row{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid #f5f5f5}
+.fund-row:last-child{border:none}
+.fund-row .name{color:#333}
+.fund-row .val{font-weight:600}
+.fund-note{font-size:11px;color:#999;margin-top:4px;text-align:right}
+
+/* weight */
+.weight-num{font-size:42px;font-weight:700;color:#1a1a2e}
+.weight-label{font-size:13px;color:#999}
+.weight-change{font-size:14px;color:#22c55e;font-weight:600}
+</style>
+</head>
+<body>
+
+<h1>💰 草山账本</h1>
+<div class="sub" id="updateTime">加载中...</div>
+
+<!-- 总资产卡片 -->
+<div class="card">
+  <div class="big-nums">
+    <div><div class="label">🏦 存款</div><div class="num blue" id="totalDeposit">-</div></div>
+    <div><div class="label">💸 欠款</div><div class="num red" id="totalDebt">-</div></div>
+    <div><div class="label">📊 净资产</div><div class="num green" id="netWorth">-</div></div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="debtProgress" style="width:0%"></div></div>
+  <div class="progress-label"><span id="debtPaidLabel">已还0</span><span id="debtRemainLabel">剩余0</span></div>
+</div>
+
+<!-- 活钱 -->
+<div class="card">
+  <div class="card-title">💰 活钱</div>
+  <div class="row"><span>💳 银行卡</span><span class="amt" id="bankCard">-</span></div>
+  <div class="row"><span>💬 微信</span><span class="amt" id="wechat">-</span></div>
+</div>
+
+<!-- 死钱 -->
+<div class="card">
+  <div class="card-title">🔒 死钱</div>
+  <div class="row"><span>🏦 余额宝</span><span class="amt" id="yuebao">-</span></div>
+  <div id="fundDetail"></div>
+  <div class="row" style="font-weight:600;margin-top:4px"><span>死钱合计</span><span class="amt blue" id="deadTotal">-</span></div>
+</div>
+
+<!-- 基金饼图 -->
+<div class="card">
+  <div class="card-title">📈 基金分布</div>
+  <div class="chart-container"><canvas id="fundChart"></canvas></div>
+</div>
+
+<!-- 最近进账 -->
+<div class="card">
+  <div class="card-title">📥 最近进账</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>日期</th><th>项目</th><th style="text-align:right">金额</th></tr></thead>
+      <tbody id="incomeTable"><tr><td colspan="3" class="empty">暂无记录</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 最近出账 -->
+<div class="card">
+  <div class="card-title">📤 最近出账</div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>日期</th><th>项目</th><th>类别</th><th style="text-align:right">金额</th></tr></thead>
+      <tbody id="expenseTable"><tr><td colspan="4" class="empty">暂无记录</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 支出分类饼图 -->
+<div class="card">
+  <div class="card-title">🧩 支出分类</div>
+  <div class="chart-container"><canvas id="categoryChart"></canvas></div>
+</div>
+
+<!-- 体重 -->
+<div class="card">
+  <div class="card-title">⚖️ 体重</div>
+  <div style="display:flex;align-items:baseline;gap:12px">
+    <span class="weight-num" id="weight">-</span><span class="weight-label">kg</span>
+    <span class="weight-change" id="weightChange">-</span>
+  </div>
+  <div class="chart-container"><canvas id="weightChart"></canvas></div>
+</div>
+
+<script>
+// ====== 加载数据 ======
+let DATA = {};
+fetch('data.json').then(r=>r.json()).then(d=>{ DATA=d; render(); }).catch(()=>{
+  document.getElementById('updateTime').textContent = '⚠️ 数据加载失败';
+});
+
+// ====== 渲染 ======
+function render() {
+  // 基本信息
+  document.getElementById('updateTime').textContent = '📅 ' + DATA.updated + ' 更新';
+
+  // 存款/欠款/净资产
+  const fundTotal = DATA.funds.reduce((s,f) => s + f.value, 0);
+  const deadTotal = DATA.yuebao + fundTotal;
+  const totalDeposit = DATA.bankCard + DATA.wechat + deadTotal;
+  const netWorth = totalDeposit - DATA.debtRemain;
+
+  document.getElementById('totalDeposit').textContent = '¥' + totalDeposit.toFixed(0);
+  document.getElementById('totalDebt').textContent = '¥' + DATA.debtRemain.toFixed(0);
+  document.getElementById('netWorth').textContent = '¥' + netWorth.toFixed(0);
+
+  // 还款进度
+  const pct = Math.min(100, (DATA.debtPaid / DATA.debtTotal * 100));
+  document.getElementById('debtProgress').style.width = pct + '%';
+  document.getElementById('debtPaidLabel').textContent = '已还 ¥' + DATA.debtPaid;
+  document.getElementById('debtRemainLabel').textContent = '剩余 ¥' + DATA.debtRemain + '（目标 ' + DATA.payOffTarget + '）';
+
+  // 活钱
+  document.getElementById('bankCard').textContent = '¥' + DATA.bankCard.toFixed(0) + (DATA.bankCard < 50 ? ' 🆘' : '');
+  document.getElementById('wechat').textContent = '¥' + DATA.wechat.toFixed(0);
+
+  // 死钱
+  document.getElementById('yuebao').textContent = '¥' + DATA.yuebao.toFixed(0);
+  let fd = '';
+  DATA.funds.forEach(f => {
+    fd += '<div class="fund-row"><span class="name">' + f.name + '</span><span class="val">¥' + f.value.toFixed(2) + '</span></div>';
+  });
+  document.getElementById('fundDetail').innerHTML = fd;
+  document.getElementById('deadTotal').textContent = '¥' + deadTotal.toFixed(0);
+
+  // 基金饼图
+  buildFundChart();
+  // 收支表格
+  renderIncome();
+  renderExpense();
+  // 支出分类饼图
+  buildCategoryChart();
+  // 体重
+  renderWeight();
+  buildWeightChart();
+}
+
+// ====== 基金饼图 ======
+let fundChartInstance = null;
+function buildFundChart() {
+  const ctx = document.getElementById('fundChart').getContext('2d');
+  if (fundChartInstance) fundChartInstance.destroy();
+  const values = DATA.funds.map(f => f.value);
+  const labels = DATA.funds.map(f => f.name.replace('ETF联接C','').replace('指数C',''));
+  const colors = ['#3b82f6','#8b5cf6','#06b6d4','#f59e0b'];
+  fundChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data: values, backgroundColor: colors.slice(0,labels.length), borderWidth: 0 }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } } },
+      cutout: '68%'
+    }
+  });
+}
+
+// ====== 进账 ======
+function renderIncome() {
+  const tbody = document.getElementById('incomeTable');
+  if (!DATA.income.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty">暂无记录</td></tr>';
+    return;
+  }
+  let html = '';
+  DATA.income.forEach(r => {
+    html += `<tr><td>${r.date}</td><td>${r.item}</td><td style="text-align:right"><span class="amt-in">+¥${r.amount.toFixed(2)}</span></td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ====== 出账 ======
+function renderExpense() {
+  const tbody = document.getElementById('expenseTable');
+  if (!DATA.expense.length) {
+    tbody.innerHTML = '<tr><td colspan="4" class="empty">暂无记录</td></tr>';
+    return;
+  }
+  let html = '';
+  DATA.expense.forEach(r => {
+    html += `<tr><td>${r.date}</td><td>${r.item}</td><td><span class="out-tag">${r.category}</span></td><td style="text-align:right"><span class="amt-out">-¥${r.amount.toFixed(2)}</span></td></tr>`;
+  });
+  tbody.innerHTML = html;
+}
+
+// ====== 支出分类饼图 ======
+let categoryChartInstance = null;
+function buildCategoryChart() {
+  const ctx = document.getElementById('categoryChart').getContext('2d');
+  if (categoryChartInstance) categoryChartInstance.destroy();
+  if (!DATA.expense.length) {
+    categoryChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: { labels: ['暂无'], datasets: [{ data: [1], backgroundColor: ['#eee'], borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '68%' }
+    });
+    return;
+  }
+  const map = {};
+  DATA.expense.forEach(r => { map[r.category] = (map[r.category]||0) + r.amount; });
+  const labels = Object.keys(map);
+  const values = Object.values(map);
+  const colors = ['#f97316','#3b82f6','#22c55e','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f59e0b'];
+  categoryChartInstance = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data: values, backgroundColor: colors.slice(0,labels.length), borderWidth: 0 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, padding: 12, font: { size: 11 } } } }, cutout: '68%' }
+  });
+}
+
+// ====== 体重 ======
+let weightChartInstance = null;
+function renderWeight() {
+  const records = DATA.weightRecords;
+  if (!records.length) return;
+  const latest = records[records.length - 1];
+  const first = records[0];
+  document.getElementById('weight').textContent = latest.weight.toFixed(1);
+  const diff = first.weight - latest.weight;
+  document.getElementById('weightChange').textContent = diff > 0 ? '↓' + diff.toFixed(1) + 'kg 🎉' : '↑' + Math.abs(diff).toFixed(1) + 'kg';
+}
+function buildWeightChart() {
+  const ctx = document.getElementById('weightChart').getContext('2d');
+  if (weightChartInstance) weightChartInstance.destroy();
+  const records = DATA.weightRecords;
+  if (records.length < 2) {
+    weightChartInstance = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [records[0]?.date||''], datasets: [{ data: [records[0]?.weight||0], borderColor: '#22c55e', tension: 0.3 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false } } }
+    });
+    return;
+  }
+  const labels = records.map(r => r.date);
+  const data = records.map(r => r.weight);
+  const min = Math.min(...data) - 2;
+  const max = Math.max(...data) + 2;
+  weightChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data, borderColor: '#22c55e', backgroundColor: 'rgba(34,197,94,0.08)', fill: true,
+        tension: 0.3, pointRadius: 4, pointBackgroundColor: '#22c55e', pointBorderColor: '#fff', pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' kg' } } },
+      scales: { y: { min, max, ticks: { stepSize: 1 } } }
+    }
+  });
+}
+
+render();
+</script>
+</body>
+</html>

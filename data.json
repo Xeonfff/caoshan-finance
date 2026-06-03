@@ -1,0 +1,21 @@
+{
+  "updated": "2026-06-03",
+  "bankCard": 212,
+  "wechat": 0,
+  "yuebao": 900,
+  "funds": [
+    { "name": "广发纳指100联接C", "code": "006479", "value": 100 },
+    { "name": "中欧科创AI指数C", "code": "026790", "value": 182.44 },
+    { "name": "天弘科创芯片ETF联接C", "code": "--", "value": 9 }
+  ],
+  "debtTotal": 3000,
+  "debtPaid": 800,
+  "debtRemain": 2200,
+  "payOffTarget": "2026.6.14",
+  "income": [],
+  "expense": [],
+  "weightRecords": [
+    { "date": "5/25", "weight": 94.5 },
+    { "date": "6/3", "weight": 92.9 }
+  ]
+}
