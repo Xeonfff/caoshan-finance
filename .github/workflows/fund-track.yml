@@ -2,8 +2,8 @@ name: Fund Auto Track
 
 on:
   schedule:
-    # 北京时间 22:30 = UTC 14:30
-    - cron: '30 14 * * *'
+    # 北京时间 12:30 = UTC 4:30
+    - cron: '30 4 * * *'
   workflow_dispatch:
   # 也可以手动触发
 
