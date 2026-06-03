@@ -14,7 +14,8 @@
   "payOffTarget": "2026.6.14",
   "income": [],
   "expense": [
-    { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 }
+    { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 },
+    { "date": "6/3", "item": "原神谷子", "category": "娱乐", "amount": 114.51 }
   ],
   "weightRecords": [
     { "date": "5/25", "weight": 94.5 },
