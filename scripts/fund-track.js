@@ -49,8 +49,10 @@ async function main() {
   const results = [];
   const today = getChinaDate();
 
-  // 检查今天定投是否已执行
-  const investDone = data.expense.some(
+  // 周末不执行定投
+  const dow = new Date().getDay(); // 0=周日 6=周六
+  const isWeekend = dow === 0 || dow === 6;
+  const investDone = isWeekend || data.expense.some(
     e => e.date === today.str && e.item === '纳指定投'
   );
 
