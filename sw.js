@@ -2,6 +2,7 @@ const CACHE = 'caoshan-v1';
 const URLS = [
   './',
   './index.html',
+  './bill.html',
   './manifest.json',
   './icon.svg',
   './data.json'
