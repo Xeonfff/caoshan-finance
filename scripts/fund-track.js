@@ -72,12 +72,25 @@ async function main() {
         throw new Error(`净值数据异常: dwjz=${info.dwjz}, gsz=${info.gsz}`);
       }
 
+      // ---- 首次运行：先确保有份额数据 ----
+      if (!fund.shares && fund.shares !== 0) {
+        fund.shares = Math.round((fund.value / currentNav) * 10000) / 10000;
+        fund.value = Math.round(fund.shares * currentNav * 100) / 100;
+        fund.change = 0;
+        results.push({
+          name: fund.name,
+          nav: currentNav,
+          shares: fund.shares,
+          value: fund.value,
+          status: '📌 首次追踪，已推算份额',
+        });
+      }
+
       // ---- 定投处理 ----
       const invest = DAILY_INVEST[fund.code];
       if (invest && !investDone) {
-        // 份额增加：定投金额 ÷ 净值
         const newShares = invest.amount / currentNav;
-        fund.shares = (fund.shares || 0) + Math.round(newShares * 10000) / 10000;
+        fund.shares = Math.round((fund.shares + newShares) * 10000) / 10000;
 
         // 扣款
         if (invest.account === 'bankCard') {
@@ -99,19 +112,9 @@ async function main() {
         });
       }
 
-      // ---- 市值计算 ----
-      if (!fund.shares && fund.shares !== 0) {
-        // 首次运行：用当前市值反推份额
-        fund.shares = Math.round((fund.value / currentNav) * 10000) / 10000;
-        fund.value = Math.round(fund.shares * currentNav * 100) / 100;
-        fund.change = 0;
-        results.push({
-          name: fund.name,
-          nav: currentNav,
-          shares: fund.shares,
-          value: fund.value,
-          status: '📌 首次追踪，已推算份额',
-        });
+      // ---- 市值更新 ----
+      if (results.find(r => r.name === fund.name && r.status?.startsWith('📌'))) {
+        // 首次追踪已处理，跳过
       } else {
         const oldValue = fund.value;
         fund.value = Math.round(fund.shares * currentNav * 100) / 100;

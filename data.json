@@ -1,13 +1,35 @@
 {
   "updated": "2026-06-03",
-  "bankCard": 178.95,
+  "bankCard": 168.95,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
-    { "name": "广发纳指100联接C", "code": "006479", "value": 100 },
-    { "name": "中欧科创AI指数C", "code": "026790", "value": 182.44, "shares": 200 },
-    { "name": "天弘科创芯片ETF联接C", "code": "027575", "value": 9 },
-    { "name": "南方上海金ETF联接C", "code": "018394", "value": 1 }
+    {
+      "name": "广发纳指100联接C",
+      "code": "006479",
+      "value": 109.96,
+      "shares": 13.02,
+      "change": -0.04
+    },
+    {
+      "name": "中欧科创AI指数C",
+      "code": "026790",
+      "value": 182.44,
+      "shares": 200,
+      "change": 0
+    },
+    {
+      "name": "天弘科创芯片ETF联接C",
+      "code": "027575",
+      "value": 9
+    },
+    {
+      "name": "南方上海金ETF联接C",
+      "code": "018394",
+      "value": 1,
+      "shares": 0.8272,
+      "change": 0
+    }
   ],
   "debtTotal": 3000,
   "debtPaid": 800,
@@ -15,15 +37,57 @@
   "payOffTarget": "2026.6.14",
   "income": [],
   "expense": [
-    { "date": "6/3", "item": "🦆 冒烤鸭", "category": "吃饭", "amount": 15.36 },
-    { "date": "6/3", "item": "🥟 红糖小糍粑", "category": "吃饭", "amount": 5 },
-    { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 },
-    { "date": "6/3", "item": "本子x2", "category": "文具", "amount": 3.8 },
-    { "date": "6/3", "item": "黄金1元", "category": "投资", "amount": 1 },
-    { "date": "6/3", "item": "🧋 菊花茶", "category": "吃饭", "amount": 5.89 }
+    {
+      "date": "6/3",
+      "item": "🦆 冒烤鸭",
+      "category": "吃饭",
+      "amount": 15.36
+    },
+    {
+      "date": "6/3",
+      "item": "🥟 红糖小糍粑",
+      "category": "吃饭",
+      "amount": 5
+    },
+    {
+      "date": "6/3",
+      "item": "本子",
+      "category": "文具",
+      "amount": 2
+    },
+    {
+      "date": "6/3",
+      "item": "本子x2",
+      "category": "文具",
+      "amount": 3.8
+    },
+    {
+      "date": "6/3",
+      "item": "黄金1元",
+      "category": "投资",
+      "amount": 1
+    },
+    {
+      "date": "6/3",
+      "item": "🧋 菊花茶",
+      "category": "吃饭",
+      "amount": 5.89
+    },
+    {
+      "date": "6/3",
+      "item": "纳指定投",
+      "category": "基金",
+      "amount": 10
+    }
   ],
   "weightRecords": [
-    { "date": "5/25", "weight": 94.5 },
-    { "date": "6/3", "weight": 92.9 }
+    {
+      "date": "5/25",
+      "weight": 94.5
+    },
+    {
+      "date": "6/3",
+      "weight": 92.9
+    }
   ]
 }
