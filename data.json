@@ -7,18 +7,20 @@
     {
       "name": "广发纳指100联接C",
       "code": "006479",
-      "value": 99.94,
+      "value": 100.41,
       "shares": 11.84,
-      "lastNav": 8.4413,
-      "change": -0.05
+      "lastNav": 8.4804,
+      "change": 0.41,
+      "lastNavDate": "2026-06-03"
     },
     {
       "name": "中欧科创AI指数C",
       "code": "026790",
-      "value": 186.02,
+      "value": 186.08,
       "shares": 200,
-      "lastNav": 0.9301,
-      "change": 3.58
+      "lastNav": 0.9304,
+      "change": 3.64,
+      "lastNavDate": "2026-06-03"
     },
     {
       "name": "天弘科创芯片ETF联接C",
@@ -30,8 +32,9 @@
       "code": "018394",
       "value": 1,
       "shares": 0.8272,
-      "lastNav": 1.2092,
-      "change": 0
+      "lastNav": 1.2132,
+      "change": 0,
+      "lastNavDate": "2026-06-03"
     }
   ],
   "debtTotal": 3000,
