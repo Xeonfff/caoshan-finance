@@ -1,6 +1,6 @@
 {
   "updated": "2026-06-03",
-  "bankCard": 205.2,
+  "bankCard": 189.84,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
@@ -15,6 +15,7 @@
   "payOffTarget": "2026.6.14",
   "income": [],
   "expense": [
+    { "date": "6/3", "item": "🦆 冒烤鸭", "category": "吃饭", "amount": 15.36 },
     { "date": "6/3", "item": "本子", "category": "文具", "amount": 2 },
     { "date": "6/3", "item": "本子x2", "category": "文具", "amount": 3.8 },
     { "date": "6/3", "item": "黄金1元", "category": "投资", "amount": 1 }
