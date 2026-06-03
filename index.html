@@ -62,7 +62,24 @@ td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
 .fund-row .val{font-weight:600}
 .fund-note{font-size:11px;color:#999;margin-top:4px;text-align:right}
 
-/* weight */
+/* 浮动按钮 + 弹窗 */
+.fab{position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#1a1a2e;color:#fff;border:none;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:100;display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.fab:active{transform:scale(.92)}
+.overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:200;justify-content:center;align-items:center}
+.overlay.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:24px;width:88%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.15)}
+.modal h3{font-size:18px;margin-bottom:16px}
+.modal label{font-size:13px;color:#666;display:block;margin-top:12px;margin-bottom:4px}
+.modal input,.modal select{width:100%;padding:10px 12px;border:1px solid #e0e0e0;border-radius:10px;font-size:14px;outline:none;box-sizing:border-box}
+.modal input:focus,.modal select:focus{border-color:#1a1a2e}
+.modal .btn-row{display:flex;gap:10px;margin-top:18px}
+.modal .btn-row button{flex:1;padding:10px;border-radius:10px;border:none;font-size:14px;font-weight:600;cursor:pointer}
+.modal .btn-cancel{background:#f0f2f5;color:#666}
+.modal .btn-submit{background:#1a1a2e;color:#fff}
+.modal .token-row{margin-top:16px;padding-top:14px;border-top:1px solid #f0f0f0}
+.modal .token-row label{font-size:12px;color:#999;margin-top:0}
+.modal .token-row input{font-size:12px;padding:8px 10px}
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.75);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:300;transition:opacity .3s}
 .weight-num{font-size:42px;font-weight:700;color:#1a1a2e}
 .weight-label{font-size:13px;color:#999}
 .weight-change{font-size:14px;color:#22c55e;font-weight:600}
@@ -146,11 +163,38 @@ td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
   <div class="chart-container"><canvas id="weightChart"></canvas></div>
 </div>
 
-<!-- 强制刷新 -->
-<div class="card" style="text-align:center;cursor:pointer" onclick="clearCacheAndReload()">
-  <div style="font-size:13px;color:#ef4444;font-weight:600">🔄 强制刷新</div>
-  <div style="font-size:11px;color:#999;margin-top:4px">清除缓存并重新加载最新数据</div>
+<!-- 浮动记账按钮 -->
+<button class="fab" onclick="openModal()">+</button>
+
+<!-- 记账弹窗 -->
+<div class="overlay" id="overlay" onclick="closeModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h3>📝 记一笔</h3>
+    <label>日期</label>
+    <input type="text" id="entryDate" placeholder="6/3">
+    <label>项目</label>
+    <input type="text" id="entryItem" placeholder="买菜">
+    <label>类别</label>
+    <select id="entryCategory">
+      <option value="餐饮">餐饮</option><option value="交通">交通</option>
+      <option value="购物">购物</option><option value="文具">文具</option>
+      <option value="投资">投资</option><option value="其他">其他</option>
+    </select>
+    <label>金额 (正=支出 负=收入)</label>
+    <input type="number" id="entryAmount" step="0.01" placeholder="0.00">
+    <div class="btn-row">
+      <button class="btn-cancel" onclick="closeModal()">取消</button>
+      <button class="btn-submit" onclick="submitEntry()">✓ 提交</button>
+    </div>
+    <div class="token-row">
+      <label>GitHub Token（用于同步到仓库，首次需填写）</label>
+      <input type="password" id="ghToken" placeholder="ghp_..." onchange="saveToken()">
+    </div>
+  </div>
 </div>
+
+<!-- Toast -->
+<div class="toast" id="toast" style="opacity:0;pointer-events:none"></div>
 
 <script>
 // ====== 强制刷新 ======
@@ -343,6 +387,75 @@ function buildWeightChart() {
       scales: { y: { min, max, ticks: { stepSize: 1 } } }
     }
   });
+}
+
+// ====== 快捷记账 ======
+function openModal() {
+  const d = new Date();
+  document.getElementById('entryDate').value = `${d.getMonth()+1}/${d.getDate()}`;
+  document.getElementById('entryItem').value = '';
+  document.getElementById('entryAmount').value = '';
+  document.getElementById('overlay').classList.add('show');
+  const saved = localStorage.getItem('financeToken');
+  if (saved) document.getElementById('ghToken').value = saved;
+}
+function closeModal(e) {
+  if (e && e.target !== e.currentTarget) return;
+  document.getElementById('overlay').classList.remove('show');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.style.opacity = '1';
+  setTimeout(() => { t.style.opacity = '0'; }, 2000);
+}
+function saveToken() {
+  const v = document.getElementById('ghToken').value.trim();
+  if (v) localStorage.setItem('financeToken', v);
+}
+function getToken() {
+  return localStorage.getItem('financeToken') || '';
+}
+
+async function submitEntry() {
+  const date = document.getElementById('entryDate').value.trim();
+  const item = document.getElementById('entryItem').value.trim();
+  const category = document.getElementById('entryCategory').value;
+  const amount = parseFloat(document.getElementById('entryAmount').value);
+  const token = getToken();
+  if (!date || !item || isNaN(amount) || !amount) { showToast('⚠️ 请填写完整'); return; }
+  if (!token) { showToast('⚠️ 请先填写 GitHub Token'); return; }
+  document.querySelector('.btn-submit').disabled = true;
+  document.querySelector('.btn-submit').textContent = '⏳...';
+  try {
+    // 获取当前 data.json (直接从 GitHub，绕过缓存)
+    const repo = 'Xeonfff/caoshan-finance';
+    const path = 'data.json';
+    const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+    const meta = await (await fetch(url, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } })).json();
+    const content = JSON.parse(atob(meta.content));
+    // 按正负决定是支出还是收入
+    if (amount > 0) {
+      content.expense.push({ date, item, category, amount });
+    } else {
+      content.income.push({ date, item, amount: Math.abs(amount) });
+    }
+    content.updated = `${new Date().getMonth()+1}/${new Date().getDate()}`;
+    const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
+    await fetch(url, {
+      method: 'PUT',
+      headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: `📝 ${item} ${amount > 0 ? '-' : '+'}¥${Math.abs(amount).toFixed(2)}`, content: newContent, sha: meta.sha })
+    });
+    DATA = content;
+    render();
+    closeModal();
+    showToast('✅ 记账成功');
+  } catch (e) {
+    showToast('❌ 同步失败: ' + (e.message || ''));
+  } finally {
+    document.querySelector('.btn-submit').disabled = false;
+    document.querySelector('.btn-submit').textContent = '✓ 提交';
+  }
 }
 
 render();
