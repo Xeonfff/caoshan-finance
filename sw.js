@@ -26,7 +26,12 @@ self.addEventListener('fetch', e => {
     e.respondWith(networkFirst(e.request));
     return;
   }
-  // 本站资源 → 缓存优先
+  // data.json → 网络优先（数据经常变）
+  if (url.pathname.endsWith('/data.json')) {
+    e.respondWith(networkFirst(e.request));
+    return;
+  }
+  // 其他本站资源 → 缓存优先
   e.respondWith(cacheFirst(e.request));
 });
 
