@@ -1,0 +1,47 @@
+const CACHE = 'caoshan-v1';
+const URLS = [
+  './',
+  './index.html',
+  './manifest.json',
+  './icon.svg',
+  './data.json'
+];
+
+self.addEventListener('install', e => {
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll(URLS)).then(() => self.skipWaiting())
+  );
+});
+
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))
+  );
+});
+
+self.addEventListener('fetch', e => {
+  const url = new URL(e.request.url);
+  // Chart.js CDN → 网络优先
+  if (url.hostname === 'cdn.jsdelivr.net') {
+    e.respondWith(networkFirst(e.request));
+    return;
+  }
+  // 本站资源 → 缓存优先
+  e.respondWith(cacheFirst(e.request));
+});
+
+async function networkFirst(req) {
+  const cache = await caches.open(CACHE);
+  try {
+    const res = await fetch(req);
+    if (res.ok) cache.put(req, res.clone());
+    return res;
+  } catch {
+    return cache.match(req) || new Response('', { status: 503 });
+  }
+}
+
+async function cacheFirst(req) {
+  const cached = await caches.match(req);
+  return cached || fetch(req);
+}
