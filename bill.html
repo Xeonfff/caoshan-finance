@@ -24,6 +24,17 @@ body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;col
 .tab{flex:1;text-align:center;padding:10px 0;font-size:14px;font-weight:600;border-radius:10px;cursor:pointer;color:#999;transition:all .2s}
 .tab.active{background:#1a1a2e;color:#fff}
 
+/* 导航栏 */
+.nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:16px;padding:12px 16px;margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.nav .arrow{font-size:20px;cursor:pointer;color:#3b82f6;user-select:none;padding:4px 8px;border-radius:8px;transition:background .15s}
+.nav .arrow:active{background:#f0f2f5}
+.nav .arrow.disabled{color:#ddd;pointer-events:none}
+.nav .center{text-align:center}
+.nav .center .title{font-size:16px;font-weight:600;display:block}
+.nav .center .sub{font-size:11px;color:#999;display:block;margin-top:2px}
+.nav .today{font-size:12px;color:#3b82f6;cursor:pointer;padding:4px 10px;border-radius:8px;background:#f0f5ff;transition:background .15s}
+.nav .today:active{background:#dbeafe}
+
 /* 汇总卡片 */
 .summary-card{background:linear-gradient(135deg,#1a1a2e,#16213e);color:#fff;border-radius:16px;padding:18px 20px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,.1)}
 .summary-card .label{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:4px}
@@ -53,8 +64,6 @@ body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;col
 
 /* 空状态 */
 .empty{text-align:center;color:#ccc;padding:40px 0;font-size:13px}
-
-.sub{color:#666;font-size:13px;margin-bottom:16px}
 </style>
 </head>
 <body>
@@ -70,6 +79,7 @@ body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;col
 </div>
 
 <div id="summaryArea"></div>
+<div id="navArea"></div>
 <div id="billList"></div>
 
 <script>
@@ -86,7 +96,10 @@ document.querySelectorAll('.tab').forEach(el => {
 
 // ====== 加载数据 ======
 let DATA = {};
-fetch('data.json').then(r=>r.json()).then(d=>{ DATA=d; render(); }).catch(()=>{
+let dayList = [], monthList = [];
+let dayIdx = 0, monthIdx = 0;
+
+fetch('data.json').then(r=>r.json()).then(d=>{ DATA=d; buildIndex(); render(); }).catch(()=>{
   document.getElementById('billList').innerHTML = '<div class="empty">⚠️ 数据加载失败</div>';
 });
 
@@ -105,145 +118,192 @@ function fmtMonth(str) {
 }
 const CAT_COLORS = ['#f97316','#3b82f6','#22c55e','#ef4444','#8b5cf6','#ec4899','#14b8a6','#f59e0b'];
 
+// ====== 构建索引 ======
+function buildIndex() {
+  const exp = DATA.expense || [];
+  const inc = DATA.income || [];
+
+  // 日索引
+  const dayMap = {};
+  [...exp, ...inc].forEach(r => {
+    if (!dayMap[r.date]) dayMap[r.date] = true;
+  });
+  dayList = Object.keys(dayMap).sort((a, b) => parseDate(b) - parseDate(a));
+  dayIdx = 0;
+
+  // 月索引
+  const monthMap = {};
+  [...exp, ...inc].forEach(r => {
+    const m = fmtMonth(r.date);
+    monthMap[m] = true;
+  });
+  monthList = Object.keys(monthMap).sort().reverse();
+  monthIdx = 0;
+}
+
 // ====== 主渲染 ======
 function render() {
   const exp = DATA.expense || [];
   const inc = DATA.income || [];
 
-  if (currentTab === 'daily') renderDaily(exp, inc);
-  else renderMonthly(exp, inc);
+  if (currentTab === 'daily') {
+    renderDailyNav();
+    renderDaily(exp, inc);
+  } else {
+    renderMonthlyNav();
+    renderMonthly(exp, inc);
+  }
+}
+
+// ====== 日导航 ======
+function renderDailyNav() {
+  if (!dayList.length) {
+    document.getElementById('navArea').innerHTML = '';
+    return;
+  }
+  const cur = dayList[dayIdx];
+  const canPrev = dayIdx < dayList.length - 1;
+  const canNext = dayIdx > 0;
+  document.getElementById('navArea').innerHTML = `
+    <div class="nav">
+      <span class="arrow ${canPrev ? '' : 'disabled'}" onclick="goDay(${dayIdx + 1})">‹</span>
+      <div class="center">
+        <span class="title">${fmtDate(cur)}</span>
+        <span class="sub">可查看共 ${dayList.length} 天</span>
+      </div>
+      <span class="arrow ${canNext ? '' : 'disabled'}" onclick="goDay(${dayIdx - 1})">›</span>
+    </div>
+  `;
+}
+
+function goDay(idx) {
+  if (idx < 0 || idx >= dayList.length) return;
+  dayIdx = idx;
+  render();
+}
+
+// ====== 月导航 ======
+function renderMonthlyNav() {
+  if (!monthList.length) {
+    document.getElementById('navArea').innerHTML = '';
+    return;
+  }
+  const cur = monthList[monthIdx];
+  const canPrev = monthIdx < monthList.length - 1;
+  const canNext = monthIdx > 0;
+  document.getElementById('navArea').innerHTML = `
+    <div class="nav">
+      <span class="arrow ${canPrev ? '' : 'disabled'}" onclick="goMonth(${monthIdx + 1})">‹</span>
+      <div class="center">
+        <span class="title">${cur}</span>
+        <span class="sub">可查看共 ${monthList.length} 个月</span>
+      </div>
+      <span class="arrow ${canNext ? '' : 'disabled'}" onclick="goMonth(${monthIdx - 1})">›</span>
+    </div>
+  `;
+}
+
+function goMonth(idx) {
+  if (idx < 0 || idx >= monthList.length) return;
+  monthIdx = idx;
+  render();
 }
 
 // ====== 日账单 ======
 function renderDaily(expenses, incomes) {
-  // 按日期分组
-  const dayMap = {};
-  expenses.forEach(r => {
-    if (!dayMap[r.date]) dayMap[r.date] = { expenses: [], incomes: [] };
-    dayMap[r.date].expenses.push(r);
-  });
-  incomes.forEach(r => {
-    if (!dayMap[r.date]) dayMap[r.date] = { expenses: [], incomes: [] };
-    dayMap[r.date].incomes.push(r);
-  });
-
-  const dates = Object.keys(dayMap).sort((a, b) => parseDate(b) - parseDate(a));
-  if (!dates.length) {
+  if (!dayList.length) {
     document.getElementById('summaryArea').innerHTML = '';
     document.getElementById('billList').innerHTML = '<div class="empty">暂无记录</div>';
     return;
   }
 
-  // 汇总
-  let totalOut = 0, totalIn = 0;
-  expenses.forEach(r => totalOut += r.amount);
-  incomes.forEach(r => totalIn += r.amount);
+  const date = dayList[dayIdx];
+  const dayExp = expenses.filter(r => r.date === date);
+  const dayInc = incomes.filter(r => r.date === date);
+  const dayOut = dayExp.reduce((s, r) => s + r.amount, 0);
+  const dayIn = dayInc.reduce((s, r) => s + r.amount, 0);
 
   document.getElementById('summaryArea').innerHTML = `
     <div class="summary-card">
-      <div class="label">总支出</div>
-      <div class="num">¥${totalOut.toFixed(2)}</div>
-      <div class="sub-info">共 ${dates.length} 天有记录 · 总收入 ¥${totalIn.toFixed(2)}</div>
+      <div class="label">${fmtDate(date)} 支出</div>
+      <div class="num">¥${dayOut.toFixed(2)}</div>
+      <div class="sub-info">${dayInc.length ? '收入 ¥' + dayIn.toFixed(2) : '无收入'}</div>
     </div>
   `;
 
-  let html = '';
-  dates.forEach(date => {
-    const day = dayMap[date];
-    const dayOut = day.expenses.reduce((s, r) => s + r.amount, 0);
-    const dayIn = day.incomes.reduce((s, r) => s + r.amount, 0);
-    const rows = day.expenses.map(r =>
-      `<div class="row"><span>${r.item} <span class="tag">${r.category}</span></span><span class="amt amt-out">-¥${r.amount.toFixed(2)}</span></div>`
-    ).join('');
-    const inRows = day.incomes.map(r =>
-      `<div class="row"><span>${r.item}</span><span class="amt amt-in">+¥${r.amount.toFixed(2)}</span></div>`
-    ).join('');
+  const rows = dayExp.map(r =>
+    `<div class="row"><span>${r.item} <span class="tag">${r.category}</span></span><span class="amt amt-out">-¥${r.amount.toFixed(2)}</span></div>`
+  ).join('');
+  const inRows = dayInc.map(r =>
+    `<div class="row"><span>${r.item}</span><span class="amt amt-in">+¥${r.amount.toFixed(2)}</span></div>`
+  ).join('');
 
-    html += `
-      <div class="card">
-        <div class="card-header">
-          <span class="date">${fmtDate(date)}</span>
-          <span class="total">-¥${dayOut.toFixed(2)}${dayIn > 0 ? ` · <span class="green">+¥${dayIn.toFixed(2)}</span>` : ''}</span>
-        </div>
-        ${inRows}${rows}
-        ${!day.expenses.length && !day.incomes.length ? '<div class="empty">暂无明细</div>' : ''}
+  document.getElementById('billList').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <span class="date">${fmtDate(date)}</span>
+        <span class="total">-¥${dayOut.toFixed(2)}${dayIn > 0 ? ` · <span class="green">+¥${dayIn.toFixed(2)}</span>` : ''}</span>
       </div>
-    `;
-  });
-  document.getElementById('billList').innerHTML = html;
+      ${inRows}${rows}
+      ${!dayExp.length && !dayInc.length ? '<div class="empty">暂无明细</div>' : ''}
+    </div>
+  `;
 }
 
 // ====== 月账单 ======
 function renderMonthly(expenses, incomes) {
-  const monthMap = {};
-  expenses.forEach(r => {
-    const m = fmtMonth(r.date);
-    if (!monthMap[m]) monthMap[m] = { expenses: [], incomes: [], cats: {} };
-    monthMap[m].expenses.push(r);
-    monthMap[m].cats[r.category] = (monthMap[m].cats[r.category] || 0) + r.amount;
-  });
-  incomes.forEach(r => {
-    const m = fmtMonth(r.date);
-    if (!monthMap[m]) monthMap[m] = { expenses: [], incomes: [], cats: {} };
-    monthMap[m].incomes.push(r);
-  });
-
-  const months = Object.keys(monthMap).sort().reverse();
-  if (!months.length) {
+  if (!monthList.length) {
     document.getElementById('summaryArea').innerHTML = '';
     document.getElementById('billList').innerHTML = '<div class="empty">暂无记录</div>';
     return;
   }
 
-  let totalOut = 0, totalIn = 0;
-  expenses.forEach(r => totalOut += r.amount);
-  incomes.forEach(r => totalIn += r.amount);
+  const month = monthList[monthIdx];
+  const moExp = expenses.filter(r => fmtMonth(r.date) === month);
+  const moInc = incomes.filter(r => fmtMonth(r.date) === month);
+  const monthOut = moExp.reduce((s, r) => s + r.amount, 0);
+  const monthIn = moInc.reduce((s, r) => s + r.amount, 0);
+
+  // 分类汇总
+  const cats = {};
+  moExp.forEach(r => { cats[r.category] = (cats[r.category] || 0) + r.amount; });
+  const catKeys = Object.keys(cats);
 
   document.getElementById('summaryArea').innerHTML = `
     <div class="summary-card">
-      <div class="label">总支出</div>
-      <div class="num">¥${totalOut.toFixed(2)}</div>
-      <div class="sub-info">共 ${months.length} 个月 · 总收入 ¥${totalIn.toFixed(2)}</div>
+      <div class="label">${month} 总支出</div>
+      <div class="num">¥${monthOut.toFixed(2)}</div>
+      <div class="sub-info">${moInc.length ? '收入 ¥' + monthIn.toFixed(2) : '无收入'} · 共 ${moExp.length} 笔</div>
     </div>
   `;
 
-  let html = '';
-  months.forEach(m => {
-    const mo = monthMap[m];
-    const monthOut = mo.expenses.reduce((s, r) => s + r.amount, 0);
-    const monthIn = mo.incomes.reduce((s, r) => s + r.amount, 0);
-    const cats = mo.cats;
-    const catKeys = Object.keys(cats);
+  let catHtml = '';
+  if (catKeys.length) {
+    catHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0">';
+    catKeys.forEach((cat, i) => {
+      const pct = (cats[cat] / monthOut * 100).toFixed(0);
+      catHtml += `<div class="cat-row"><span><span class="cat-dot" style="background:${CAT_COLORS[i % CAT_COLORS.length]}"></span><span class="cat-label">${cat}</span></span><span class="cat-amt">¥${cats[cat].toFixed(2)} <span style="color:#999;font-size:11px">${pct}%</span></span></div>`;
+    });
+    catHtml += '</div>';
+  }
 
-    let catHtml = '';
-    if (catKeys.length) {
-      catHtml = '<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0f0f0">';
-      catKeys.forEach((cat, i) => {
-        const pct = (cats[cat] / monthOut * 100).toFixed(0);
-        catHtml += `<div class="cat-row"><span><span class="cat-dot" style="background:${CAT_COLORS[i % CAT_COLORS.length]}"></span><span class="cat-label">${cat}</span></span><span class="cat-amt">¥${cats[cat].toFixed(2)} <span style="color:#999;font-size:11px">${pct}%</span></span></div>`;
-      });
-      catHtml += '</div>';
-    }
+  const rows = moExp.map(r =>
+    `<div class="row"><span>${fmtDate(r.date)} ${r.item} <span class="tag">${r.category}</span></span><span class="amt amt-out">-¥${r.amount.toFixed(2)}</span></div>`
+  ).join('');
+  const inRows = moInc.map(r =>
+    `<div class="row"><span>${fmtDate(r.date)} ${r.item}</span><span class="amt amt-in">+¥${r.amount.toFixed(2)}</span></div>`
+  ).join('');
 
-    const rows = mo.expenses.map(r =>
-      `<div class="row"><span>${fmtDate(r.date)} ${r.item} <span class="tag">${r.category}</span></span><span class="amt amt-out">-¥${r.amount.toFixed(2)}</span></div>`
-    ).join('');
-    const inRows = mo.incomes.map(r =>
-      `<div class="row"><span>${fmtDate(r.date)} ${r.item}</span><span class="amt amt-in">+¥${r.amount.toFixed(2)}</span></div>`
-    ).join('');
-
-    html += `
-      <div class="card">
-        <div class="card-header">
-          <span class="date">${m}</span>
-          <span class="total">-¥${monthOut.toFixed(2)}${monthIn > 0 ? ` · <span class="green">+¥${monthIn.toFixed(2)}</span>` : ''}</span>
-        </div>
-        ${inRows}${rows}
-        ${catHtml}
+  document.getElementById('billList').innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <span class="date">${month}</span>
+        <span class="total">-¥${monthOut.toFixed(2)}${monthIn > 0 ? ` · <span class="green">+¥${monthIn.toFixed(2)}</span>` : ''}</span>
       </div>
-    `;
-  });
-  document.getElementById('billList').innerHTML = html;
+      ${inRows}${rows}
+      ${catHtml}
+    </div>
+  `;
 }
 </script>
 </body>
