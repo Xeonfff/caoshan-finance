@@ -73,7 +73,8 @@ async function main() {
       }
 
       // ---- 首次运行：先确保有份额数据 ----
-      if (!fund.shares && fund.shares !== 0) {
+      const isFirstRun = !fund.shares && fund.shares !== 0;
+      if (isFirstRun) {
         fund.shares = Math.round((fund.value / currentNav) * 10000) / 10000;
         fund.value = Math.round(fund.shares * currentNav * 100) / 100;
         fund.change = 0;
@@ -86,9 +87,9 @@ async function main() {
         });
       }
 
-      // ---- 定投处理 ----
+      // ---- 定投处理（首次运行的基金跳过，已有市值已含当日投入） ----
       const invest = DAILY_INVEST[fund.code];
-      if (invest && !investDone) {
+      if (invest && !investDone && !isFirstRun) {
         const newShares = invest.amount / currentNav;
         fund.shares = Math.round((fund.shares + newShares) * 10000) / 10000;
 
