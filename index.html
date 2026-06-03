@@ -180,7 +180,15 @@ td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
       <option value="购物">购物</option><option value="文具">文具</option>
       <option value="投资">投资</option><option value="其他">其他</option>
     </select>
-    <label>金额 (正=支出 负=收入)</label>
+    <div style="display:flex;gap:10px;margin-top:12px">
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid #e0e0e0;border-radius:10px;cursor:pointer;font-size:14px" onclick="selectType('expense')">
+        <input type="radio" name="entryType" value="expense" checked style="accent-color:#ef4444"> 📤 支出
+      </label>
+      <label style="flex:1;display:flex;align-items:center;gap:6px;padding:8px 12px;border:2px solid #e0e0e0;border-radius:10px;cursor:pointer;font-size:14px" onclick="selectType('income')">
+        <input type="radio" name="entryType" value="income" style="accent-color:#22c55e"> 📥 收入
+      </label>
+    </div>
+    <label style="margin-top:8px">金额</label>
     <input type="number" id="entryAmount" step="0.01" placeholder="0.00">
     <div class="btn-row">
       <button class="btn-cancel" onclick="closeModal()">取消</button>
@@ -408,6 +416,11 @@ function showToast(msg) {
   t.textContent = msg; t.style.opacity = '1';
   setTimeout(() => { t.style.opacity = '0'; }, 2000);
 }
+function selectType(t) {
+  document.querySelectorAll('[onclick*="selectType"]').forEach(el => {
+    el.style.borderColor = el.querySelector('input').value === t ? (t === 'expense' ? '#ef4444' : '#22c55e') : '#e0e0e0';
+  });
+}
 function saveToken() {
   const v = document.getElementById('ghToken').value.trim();
   if (v) localStorage.setItem('financeToken', v);
@@ -427,24 +440,23 @@ async function submitEntry() {
   document.querySelector('.btn-submit').disabled = true;
   document.querySelector('.btn-submit').textContent = '⏳...';
   try {
-    // 获取当前 data.json (直接从 GitHub，绕过缓存)
     const repo = 'Xeonfff/caoshan-finance';
     const path = 'data.json';
     const url = `https://api.github.com/repos/${repo}/contents/${path}`;
     const meta = await (await fetch(url, { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } })).json();
     const content = JSON.parse(atob(meta.content));
-    // 按正负决定是支出还是收入
-    if (amount > 0) {
+    const isExpense = document.querySelector('input[name="entryType"]:checked').value === 'expense';
+    if (isExpense) {
       content.expense.push({ date, item, category, amount });
     } else {
-      content.income.push({ date, item, amount: Math.abs(amount) });
+      content.income.push({ date, item, amount });
     }
     content.updated = `${new Date().getMonth()+1}/${new Date().getDate()}`;
     const newContent = btoa(unescape(encodeURIComponent(JSON.stringify(content, null, 2))));
     await fetch(url, {
       method: 'PUT',
       headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: `📝 ${item} ${amount > 0 ? '-' : '+'}¥${Math.abs(amount).toFixed(2)}`, content: newContent, sha: meta.sha })
+      body: JSON.stringify({ message: `📝 ${item} ${isExpense ? '-' : '+'}¥${amount.toFixed(2)}`, content: newContent, sha: meta.sha })
     });
     DATA = content;
     render();
