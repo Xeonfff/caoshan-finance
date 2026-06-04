@@ -1,8 +1,9 @@
 {
   "updated": "2026-06-04",
-  "bankCard": 125.39,
+  "bankCard": 129.39,
+  "postalSavings": null,
   "wechat": 0,
-  "yuebao": 900,
+  "yuebao": 3700,
   "funds": [
     {
       "name": "广发纳指100联接C",
@@ -41,14 +42,7 @@
   "debtPaid": 800,
   "debtRemain": 2200,
   "payOffTarget": "2026.6.14",
-  "income": [
-    {
-      "date": "6/4",
-      "item": "💰 保险钱（妈妈）",
-      "category": "活钱",
-      "amount": 155
-    }
-  ],
+  "income": [],
   "expense": [
     {
       "date": "6/3",
@@ -120,7 +114,7 @@
       "date": "6/4",
       "item": "🎮 皮肤（送铁哥们）",
       "category": "送礼",
-      "amount": 159
+      "amount": 155
     }
   ],
   "weightRecords": [
