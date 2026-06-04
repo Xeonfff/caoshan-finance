@@ -1,6 +1,6 @@
 {
   "updated": "2026-06-04",
-  "bankCard": 153.24,
+  "bankCard": 148.24,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
@@ -90,6 +90,12 @@
       "item": "🦆 冒烤鸭",
       "category": "吃饭",
       "amount": 15.71
+    },
+    {
+      "date": "6/4",
+      "item": "🥛 乳酸菌",
+      "category": "吃饭",
+      "amount": 5
     }
   ],
   "weightRecords": [
