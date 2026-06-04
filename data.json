@@ -1,6 +1,6 @@
 {
   "updated": "2026-06-04",
-  "bankCard": 129.39,
+  "bankCard": 125.39,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
@@ -46,7 +46,7 @@
       "date": "6/4",
       "item": "💰 保险钱（妈妈）",
       "category": "活钱",
-      "amount": 159
+      "amount": 155
     }
   ],
   "expense": [
