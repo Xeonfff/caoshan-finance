@@ -6,7 +6,7 @@
   "yuebao": 1500,
   "funds": [
     {
-      "name": "å¹¿åçº³æ100èæ¥C",
+      "name": "广发纳指100联接C",
       "code": "006479",
       "value": 109.72,
       "shares": 13.0273,
@@ -15,7 +15,7 @@
       "lastNavDate": "2026-06-04"
     },
     {
-      "name": "ä¸­æ¬§ç§åAIææ°C",
+      "name": "中欧科创AI指数C",
       "code": "026790",
       "value": 185.16,
       "shares": 200,
@@ -24,12 +24,12 @@
       "lastNavDate": "2026-06-04"
     },
     {
-      "name": "å¤©å¼ç§åè¯çETFèæ¥C",
+      "name": "天弘科创芯片ETF联接C",
       "code": "027575",
       "value": 9
     },
     {
-      "name": "åæ¹ä¸æµ·éETFèæ¥C",
+      "name": "南方上海金ETF联接C",
       "code": "018394",
       "value": 1.01,
       "shares": 0.8272,
@@ -46,81 +46,75 @@
   "expense": [
     {
       "date": "6/3",
-      "item": "ð¦ åç¤é¸­",
-      "category": "åé¥­",
+      "item": "🦆 冒烤鸭",
+      "category": "吃饭",
       "amount": 15.36
     },
     {
       "date": "6/3",
-      "item": "ð¥ çº¢ç³å°ç³ç²",
-      "category": "åé¥­",
+      "item": "🥟 红糖小糍粑",
+      "category": "吃饭",
       "amount": 5
     },
     {
       "date": "6/3",
-      "item": "æ¬å­",
-      "category": "æå·",
+      "item": "本子",
+      "category": "文具",
       "amount": 2
     },
     {
       "date": "6/3",
-      "item": "æ¬å­x2",
-      "category": "æå·",
+      "item": "本子x2",
+      "category": "文具",
       "amount": 3.8
     },
     {
       "date": "6/3",
-      "item": "é»é1å",
-      "category": "æèµ",
+      "item": "黄金1元",
+      "category": "投资",
       "amount": 1
     },
     {
       "date": "6/3",
-      "item": "ð§ èè±è¶",
-      "category": "åé¥­",
+      "item": "🧋 菊花茶",
+      "category": "吃饭",
       "amount": 5.89
     },
     {
       "date": "6/3",
-      "item": "çº³æå®æ",
-      "category": "åºé",
+      "item": "纳指定投",
+      "category": "基金",
       "amount": 10
     },
     {
       "date": "6/4",
-      "item": "ð¦ åç¤é¸­",
-      "category": "åé¥­",
+      "item": "🦆 冒烤鸭",
+      "category": "吃饭",
       "amount": 15.71
     },
     {
       "date": "6/4",
-      "item": "ð¥ ä¹³é¸è",
-      "category": "åé¥­",
+      "item": "🥛 乳酸菌",
+      "category": "吃饭",
       "amount": 5
     },
     {
       "date": "6/4",
-      "item": "çº³æå®æ",
-      "category": "åºé",
+      "item": "纳指定投",
+      "category": "基金",
       "amount": 10
     },
     {
       "date": "6/4",
-      "item": "æ¯é¸¡æ±¤æ³¡é¥¼",
-      "category": "åé¥­",
+      "item": "母鸡汤泡饼",
+      "category": "吃饭",
       "amount": 8.85
     },
     {
       "date": "6/4",
-      "item": "ð® ç®è¤ï¼ééå¥ä»¬ï¼",
-      "category": "éç¤¼",
+      "item": "🎮 皮肤（送铁哥们）",
+      "category": "送礼",
       "amount": 155
-    },
-    {
-      "date": "6/4",
-      "item": "1",
-      "category": "餐饮",
-      "amount": 1
     }
   ],
   "weightRecords": [
