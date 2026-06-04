@@ -3,7 +3,7 @@
   "bankCard": 129.39,
   "postalSavings": null,
   "wechat": 0,
-  "yuebao": 3700,
+  "yuebao": 1500,
   "funds": [
     {
       "name": "å¹¿åçº³æ100èæ¥C",
@@ -39,8 +39,8 @@
     }
   ],
   "debtTotal": 3000,
-  "debtPaid": 800,
-  "debtRemain": 2200,
+  "debtPaid": 3000,
+  "debtRemain": 0,
   "payOffTarget": "2026.6.14",
   "income": [],
   "expense": [
