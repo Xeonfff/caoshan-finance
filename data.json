@@ -41,7 +41,14 @@
   "debtPaid": 800,
   "debtRemain": 2200,
   "payOffTarget": "2026.6.14",
-  "income": [],
+  "income": [
+    {
+      "date": "6/4",
+      "item": "🤝 铁哥们",
+      "category": "活钱",
+      "amount": 29.61
+    }
+  ],
   "expense": [
     {
       "date": "6/3",
