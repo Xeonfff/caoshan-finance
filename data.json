@@ -1,6 +1,6 @@
 {
-  "updated": "2026-06-03",
-  "bankCard": 168.95,
+  "updated": "2026-06-04",
+  "bankCard": 153.24,
   "wechat": 0,
   "yuebao": 900,
   "funds": [
@@ -84,6 +84,12 @@
       "item": "纳指定投",
       "category": "基金",
       "amount": 10
+    },
+    {
+      "date": "6/4",
+      "item": "🦆 冒烤鸭",
+      "category": "吃饭",
+      "amount": 15.71
     }
   ],
   "weightRecords": [
