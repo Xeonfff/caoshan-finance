@@ -195,8 +195,8 @@ td{padding:7px 4px;border-bottom:1px solid #f5f5f5}
       <button class="btn-submit" onclick="submitEntry()">✓ 提交</button>
     </div>
     <div class="token-row">
-      <label>GitHub Token（用于同步到仓库，首次需填写）</label>
-      <input type="password" id="ghToken" placeholder="ghp_..." onchange="saveToken()">
+      <label>GitHub Token <span id="tokenStatus" style="font-size:11px;color:#999"></span></label>
+      <input type="password" id="ghToken" placeholder="ghp_..." oninput="saveToken()">
     </div>
   </div>
 </div>
@@ -397,6 +397,32 @@ function buildWeightChart() {
   });
 }
 
+// ====== Token 管理 ======
+function migrateToken() {
+  const old = localStorage.getItem('financeToken');
+  if (old && !localStorage.getItem('githubToken')) {
+    localStorage.setItem('githubToken', old);
+  }
+}
+function updateTokenStatus() {
+  const el = document.getElementById('tokenStatus');
+  if (!el) return;
+  const tok = getToken();
+  if (tok) { el.textContent = '✅ 已保存'; el.style.color = '#22c55e'; }
+  else { el.textContent = '⚠️ 未设置'; el.style.color = '#f59e0b'; }
+}
+function saveToken() {
+  const v = document.getElementById('ghToken').value.trim();
+  if (v) { localStorage.setItem('githubToken', v); }
+  updateTokenStatus();
+}
+function getToken() {
+  return localStorage.getItem('githubToken') || localStorage.getItem('financeToken') || '';
+}
+
+// 页面加载时迁移老 token + 更新状态指示
+migrateToken();
+
 // ====== 快捷记账 ======
 function openModal() {
   const d = new Date();
@@ -404,8 +430,9 @@ function openModal() {
   document.getElementById('entryItem').value = '';
   document.getElementById('entryAmount').value = '';
   document.getElementById('overlay').classList.add('show');
-  const saved = localStorage.getItem('financeToken');
+  const saved = getToken();
   if (saved) document.getElementById('ghToken').value = saved;
+  updateTokenStatus();
 }
 function closeModal(e) {
   if (e && e.target !== e.currentTarget) return;
@@ -420,13 +447,6 @@ function selectType(t) {
   document.querySelectorAll('[onclick*="selectType"]').forEach(el => {
     el.style.borderColor = el.querySelector('input').value === t ? (t === 'expense' ? '#ef4444' : '#22c55e') : '#e0e0e0';
   });
-}
-function saveToken() {
-  const v = document.getElementById('ghToken').value.trim();
-  if (v) localStorage.setItem('financeToken', v);
-}
-function getToken() {
-  return localStorage.getItem('financeToken') || '';
 }
 
 async function submitEntry() {

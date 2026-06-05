@@ -199,7 +199,7 @@ body{background:#f0f2f5;padding:16px 12px 32px;max-width:500px;margin:0 auto;col
     <div class="card-title">☁️ GitHub 同步</div>
     <div class="setting-row" style="flex-wrap:wrap;gap:8px">
       <span>Token</span>
-      <input type="password" id="githubToken" placeholder="ghp_..." style="flex:1;min-width:150px">
+      <input type="password" id="githubToken" placeholder="ghp_..." oninput="saveSettingsUI()" style="flex:1;min-width:150px">
     </div>
     <div class="setting-row" style="gap:8px;flex-wrap:wrap">
       <button class="btn green" onclick="syncToGithub()">⬆ 同步到 GitHub</button>
@@ -397,7 +397,8 @@ function loadSettingsUI() {
   document.getElementById('setBreak').value = s.break;
   document.getElementById('setLongBreak').value = s.longBreak;
   document.getElementById('setLongInterval').value = s.longInterval;
-  const token = localStorage.getItem('githubToken') || '';
+  const token = localStorage.getItem('githubToken') || localStorage.getItem('financeToken') || '';
+	  if (token && !localStorage.getItem('githubToken')) localStorage.setItem('githubToken', token);
   document.getElementById('githubToken').value = token;
 }
 function saveSettingsUI() {
@@ -672,7 +673,7 @@ function renderStats() {
 }
 
 // ====== GitHub同步 ======
-function getToken() { return document.getElementById('githubToken').value.trim() || localStorage.getItem('githubToken') || ''; }
+function getToken() { return document.getElementById('githubToken').value.trim() || localStorage.getItem('githubToken') || localStorage.getItem('financeToken') || ''; }
 
 async function syncToGithub() {
   const token = getToken();
