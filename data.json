@@ -1,6 +1,6 @@
 {
-  "updated": "6/5",
-  "bankCard": 129.39,
+  "updated": "2026-06-05",
+  "bankCard": 119.38999999999999,
   "postalSavings": null,
   "wechat": 0,
   "yuebao": 1500,
@@ -8,20 +8,20 @@
     {
       "name": "广发纳指100联接C",
       "code": "006479",
-      "value": 109.72,
-      "shares": 13.0273,
-      "lastNav": 8.4224,
-      "change": -0.69,
-      "lastNavDate": "2026-06-04"
+      "value": 119.14,
+      "shares": 14.221,
+      "lastNav": 8.3774,
+      "change": -0.59,
+      "lastNavDate": "2026-06-05"
     },
     {
       "name": "中欧科创AI指数C",
       "code": "026790",
-      "value": 185.16,
+      "value": 180,
       "shares": 200,
-      "lastNav": 0.9258,
-      "change": -0.92,
-      "lastNavDate": "2026-06-04"
+      "lastNav": 0.9,
+      "change": -5.16,
+      "lastNavDate": "2026-06-05"
     },
     {
       "name": "天弘科创芯片ETF联接C",
@@ -31,11 +31,11 @@
     {
       "name": "南方上海金ETF联接C",
       "code": "018394",
-      "value": 1.01,
+      "value": 1,
       "shares": 0.8272,
-      "lastNav": 1.2156,
+      "lastNav": 1.2104,
       "change": 0,
-      "lastNavDate": "2026-06-04"
+      "lastNavDate": "2026-06-05"
     }
   ],
   "income": [],
@@ -123,6 +123,12 @@
       "item": "🎮 皮肤（送铁哥们）",
       "category": "送礼",
       "amount": 155
+    },
+    {
+      "date": "6/5",
+      "item": "纳指定投",
+      "category": "基金",
+      "amount": 10
     }
   ],
   "weightRecords": [
