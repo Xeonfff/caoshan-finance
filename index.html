@@ -239,17 +239,20 @@ function render() {
   const fundTotal = DATA.funds.reduce((s,f) => s + f.value, 0);
   const deadTotal = DATA.yuebao + fundTotal;
   const totalDeposit = DATA.bankCard + DATA.wechat + deadTotal;
-  const netWorth = totalDeposit - DATA.debtRemain;
+  const debtRemain = DATA.debtRemain || 0;
+  const debtPaid = DATA.debtPaid || 0;
+  const debtTotal = DATA.debtTotal || 0;
+  const netWorth = totalDeposit - debtRemain;
 
   document.getElementById('totalDeposit').textContent = '¥' + totalDeposit.toFixed(0);
-  document.getElementById('totalDebt').textContent = '¥' + DATA.debtRemain.toFixed(0);
+  document.getElementById('totalDebt').textContent = '¥' + debtRemain.toFixed(0);
   document.getElementById('netWorth').textContent = '¥' + netWorth.toFixed(0);
 
   // 还款进度
-  const pct = Math.min(100, (DATA.debtPaid / DATA.debtTotal * 100));
+  const pct = debtTotal > 0 ? Math.min(100, (debtPaid / debtTotal * 100)) : 0;
   document.getElementById('debtProgress').style.width = pct + '%';
-  document.getElementById('debtPaidLabel').textContent = '已还 ¥' + DATA.debtPaid;
-  document.getElementById('debtRemainLabel').textContent = '剩余 ¥' + DATA.debtRemain + '（目标 ' + DATA.payOffTarget + '）';
+  document.getElementById('debtPaidLabel').textContent = '已还 ¥' + debtPaid;
+  document.getElementById('debtRemainLabel').textContent = debtTotal > 0 ? '剩余 ¥' + debtRemain + '（目标 ' + (DATA.payOffTarget || 'N/A') + '）' : '🎉 无债一身轻';
 
   // 活钱
   document.getElementById('bankCard').textContent = '¥' + DATA.bankCard.toFixed(0) + (DATA.bankCard < 50 ? ' 🆘' : '');
@@ -490,7 +493,6 @@ async function submitEntry() {
   }
 }
 
-render();
 </script>
 </body>
 </html>
