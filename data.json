@@ -1,5 +1,5 @@
 {
-  "updated": "6/4",
+  "updated": "6/5",
   "bankCard": 129.39,
   "postalSavings": null,
   "wechat": 0,
@@ -40,6 +40,12 @@
   ],
   "income": [],
   "expense": [
+    {
+      "date": "6/5",
+      "item": "🥤 无糖芬达",
+      "category": "吃饭",
+      "amount": 4.7
+    },
     {
       "date": "6/3",
       "item": "🦆 冒烤鸭",
