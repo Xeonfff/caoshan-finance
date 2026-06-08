@@ -1,6 +1,6 @@
 {
-  "updated": "2026-06-07",
-  "bankCard": 119.38999999999999,
+  "updated": "2026-06-08",
+  "bankCard": 109.38999999999999,
   "postalSavings": null,
   "wechat": 0,
   "yuebao": 1500,
@@ -8,20 +8,20 @@
     {
       "name": "广发纳指100联接C",
       "code": "006479",
-      "value": 113.75,
-      "shares": 14.221,
+      "value": 123.75,
+      "shares": 15.4712,
       "lastNav": 7.9989,
       "change": -5.38,
-      "lastNavDate": "2026-06-07"
+      "lastNavDate": "2026-06-08"
     },
     {
       "name": "中欧科创AI指数C",
       "code": "026790",
-      "value": 180,
+      "value": 175.6,
       "shares": 200,
-      "lastNav": 0.9,
-      "change": -5.16,
-      "lastNavDate": "2026-06-07"
+      "lastNav": 0.878,
+      "change": -4.4,
+      "lastNavDate": "2026-06-08"
     },
     {
       "name": "天弘科创芯片ETF联接C",
@@ -37,9 +37,9 @@
       "code": "018394",
       "value": 1,
       "shares": 0.8272,
-      "lastNav": 1.2104,
-      "change": 0,
-      "lastNavDate": "2026-06-07"
+      "lastNav": 1.2031,
+      "change": -0.01,
+      "lastNavDate": "2026-06-08"
     }
   ],
   "income": [],
@@ -130,6 +130,12 @@
     },
     {
       "date": "6/5",
+      "item": "纳指定投",
+      "category": "基金",
+      "amount": 10
+    },
+    {
+      "date": "6/8",
       "item": "纳指定投",
       "category": "基金",
       "amount": 10
