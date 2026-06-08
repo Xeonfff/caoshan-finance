@@ -1,6 +1,6 @@
 {
   "updated": "2026-06-08",
-  "bankCard": 109.38999999999999,
+  "bankCard": 109.39,
   "postalSavings": null,
   "wechat": 0,
   "yuebao": 1500,
@@ -141,6 +141,9 @@
       "amount": 10
     }
   ],
+  "debtPaid": 0,
+  "debtRemain": 0,
+  "debtTotal": 0,
   "weightRecords": [
     {
       "date": "5/25",

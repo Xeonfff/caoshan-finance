@@ -1,11 +1,10 @@
-const CACHE = 'caoshan-v1';
+const CACHE = 'caoshan-v2';
 const URLS = [
   './',
   './index.html',
   './bill.html',
   './manifest.json',
-  './icon.svg',
-  './data.json'
+  './icon.svg'
 ];
 
 self.addEventListener('install', e => {
@@ -40,10 +39,16 @@ async function networkFirst(req) {
   const cache = await caches.open(CACHE);
   try {
     const res = await fetch(req);
-    if (res.ok) cache.put(req, res.clone());
-    return res;
+    if (res.ok) {
+      cache.put(req, res.clone());
+      return res;
+    }
+    // 网络返回非 OK（404 等），回退缓存
+    const cached = await cache.match(req);
+    return cached || res;
   } catch {
-    return cache.match(req) || new Response('', { status: 503 });
+    const cached = await cache.match(req);
+    return cached || new Response('', { status: 503 });
   }
 }
 

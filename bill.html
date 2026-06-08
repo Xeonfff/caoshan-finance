@@ -119,14 +119,25 @@ let DATA = {};
 let dayList = [], monthList = [];
 let dayIdx = 0, monthIdx = 0;
 
-fetch('data.json').then(r=>r.json()).then(d=>{ DATA=d; buildIndex(); render(); }).catch(()=>{
-  document.getElementById('billList').innerHTML = '<div class="empty">⚠️ 数据加载失败</div>';
+fetch('data.json').then(r=>{
+  if (!r.ok) throw new Error(`HTTP ${r.status}`);
+  return r.json();
+}).then(d=>{ DATA=d; buildIndex(); render(); }).catch(e=>{
+  document.getElementById('billList').innerHTML = '<div class="empty">⚠️ 数据加载失败: ' + e.message + '</div>';
+  console.error('数据加载失败:', e);
 });
 
 // ====== 日期工具 ======
 function parseDate(str) {
   const parts = str.split('/');
-  return new Date(2026, parseInt(parts[0]) - 1, parseInt(parts[1]));
+  const now = new Date();
+  const year = now.getFullYear();
+  const d = new Date(year, parseInt(parts[0]) - 1, parseInt(parts[1]));
+  // 如果月份比当前月份大很多（跨年），说明是去年
+  if (d > now && (d - now) > 180 * 24 * 60 * 60 * 1000) {
+    return new Date(year - 1, parseInt(parts[0]) - 1, parseInt(parts[1]));
+  }
+  return d;
 }
 function fmtDate(str) {
   const d = parseDate(str);
