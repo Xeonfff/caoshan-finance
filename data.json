@@ -1,60 +1,13 @@
 {
-  "updated": "2026-06-08",
-  "bankCard": 109.39,
-  "postalSavings": null,
+  "updated": "6/8",
+  "bankCard": 0,
   "wechat": 0,
-  "yuebao": 1500,
-  "funds": [
-    {
-      "name": "广发纳指100联接C",
-      "code": "006479",
-      "value": 123.75,
-      "shares": 15.4712,
-      "lastNav": 7.9989,
-      "change": -5.38,
-      "lastNavDate": "2026-06-08"
-    },
-    {
-      "name": "中欧科创AI指数C",
-      "code": "026790",
-      "value": 175.6,
-      "shares": 200,
-      "lastNav": 0.878,
-      "change": -4.4,
-      "lastNavDate": "2026-06-08"
-    },
-    {
-      "name": "天弘科创芯片ETF联接C",
-      "code": "027575",
-      "value": 9,
-      "shares": 9,
-      "lastNav": 1,
-      "lastNavDate": "2026-06-05",
-      "change": 0
-    },
-    {
-      "name": "南方上海金ETF联接C",
-      "code": "018394",
-      "value": 1,
-      "shares": 0.8272,
-      "lastNav": 1.2031,
-      "change": -0.01,
-      "lastNavDate": "2026-06-08"
-    }
-  ],
+  "yuebao": 0,
+  "funds": [],
   "income": [],
   "expense": [],
   "debtPaid": 0,
   "debtRemain": 0,
   "debtTotal": 0,
-  "weightRecords": [
-    {
-      "date": "5/25",
-      "weight": 94.5
-    },
-    {
-      "date": "6/3",
-      "weight": 92.9
-    }
-  ]
+  "weightRecords": []
 }
